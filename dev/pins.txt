@@ -1,0 +1,30 @@
+    LABEL       INDEX                   PURPOSE
+
+Left:
+    Vin
+    RST
+    SK
+    SO
+    SC
+    S1
+    S2
+    D
+    S3
+    Rsv
+    Rsv
+    A1
+    A0          0, 14, 22, 30, 38
+
+Right:
+    D9			9			            0 value for 2nd bit in lcd mode
+    D8			8			            0 value for 1st bit in lcd mode
+    D7			7			            ESP32 D7
+    D6			6			            ESP32 D6
+    D5			5			            ESP32 D5
+    GND                                 ground
+    3V3                                 3.3V power source
+    D4			4			            ESP32 D4
+    D3			3			            ESP32 E
+    D2			2			            ESP32 RS
+    D1			23			            terminal rxd
+    DO						            terminal txd
