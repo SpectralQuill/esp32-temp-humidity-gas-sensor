@@ -1,0 +1,7 @@
+To percentage
+    y = 0.097655x + 0.001815
+    // then round decimal to 0 or 1
+
+To temp (C)
+    y = 0.321364x - 0.100672
+    // then round decimal 0, 0.5, or 1

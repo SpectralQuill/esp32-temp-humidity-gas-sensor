@@ -8,10 +8,12 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
+    "analog-linear-regression": "tsx dev/analog-linear-regression.ts",
     "serial-logger": "tsx dev/serial-logger.ts"
   },
   "dependencies": {
     "@types/serialport": "^8.0.5",
+    "dotenv": "^17.2.3",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "serialport": "^13.0.0"
