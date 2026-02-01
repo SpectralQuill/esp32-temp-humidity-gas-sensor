@@ -1,26 +1,26 @@
-Proteus,Label,Side,Indexes,Actual Name,Purpose
-Vin,Left,,,,
-RST,Left,,,,
-SK,Left,,,,
-SO,Left,,,,
-SC,Left,,,,
-S1,Left,,,,
-S2,Left,,,,
-D,Left,,,,
-S3,Left,32,,,gas
-Rsv,Left,,,,
-Rsv,Left,,,,
-A1,Left,35,,,humidity
-A0,Left,"0,14,22,30,38",,,temp ( C ) analog
-D9,Right,9,,,0 value for 2nd bit of LCD mode
-D8,Right,8,,,0 value for 1st bit of LCD mode
-D7,Right,7,,,LCD D7
-D6,Right,6,,,LCD D6
-D5,Right,5,,,LCD D5
-GND,Right,,,,ground
-3V3,Right,,,,+3.3V power source
-D4,Right,4,,,LCD D4
-D3,Right,3,,,LCD E
-D2,Right,2,,,LCD RS
-D1,Right,23,,,terminal rxd
-D0,Right,,,,terminal txd
+Label,Side,Indexes,Purpose
+Vin,left,,
+RST,left,,
+SK,left,,
+SO,left,,
+SC,left,,
+S1,left,,
+S2,left,,
+D,left,,
+S3,left,32,gas
+Rsv_top,left,,
+Rsv_bottom,left,,
+A1,left,35,humidity
+A0,left,"0,14,22,30,38",temp_c
+D9,right,9,lcd_bit_2
+D8,right,8,lcd_bit_1
+D7,right,7,lcd_d7
+D6,right,6,lcd_d6
+D5,right,5,lcd_d5
+GND,right,,ground
+3V3,right,,power_source_3_3v
+D4,right,4,lcd_d4
+D3,right,3,lcd_e
+D2,right,2,lcd_rs
+D1,right,23,"terminal_rxd,compim_txd"
+D0,right,,"terminal_txd,compim_rxd"
