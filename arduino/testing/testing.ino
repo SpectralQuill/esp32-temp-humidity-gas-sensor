@@ -16,10 +16,10 @@ void setup() {
 
 void loop() {
   // Skip pins 2-9 and 23
-  while ((currentPin >= 1 && currentPin <= 13) || (currentPin >= 15 && currentPin <= 21) || (currentPin >= 23 && currentPin <= 29) || (currentPin >= 31 && currentPin <= 37) || (currentPin >= 39 && currentPin <= 40) || currentPin == 23) {
-    currentPin++;
-    if (currentPin > 40) currentPin = 0;
-  }
+  // while ((currentPin >= 1 && currentPin <= 13) || (currentPin >= 15 && currentPin <= 21) || (currentPin >= 23 && currentPin <= 29) || (currentPin >= 31 && currentPin <= 37) || (currentPin >= 39 && currentPin <= 40) || currentPin == 23) {
+  //   currentPin++;
+  //   if (currentPin > 40) currentPin = 0;
+  // }
   
   int rawValue = analogRead(currentPin);
   float voltage = (rawValue * 3.3) / 4095.0;
