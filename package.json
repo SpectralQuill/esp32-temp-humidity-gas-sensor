@@ -1,36 +1,42 @@
 {
-  "name": "esp32-temp-humidity-gas-sensor",
-  "private": true,
-  "version": "0.0.0",
-  "type": "module",
-  "scripts": {
-    "dev": "vite",
-    "build": "tsc -b && vite build",
-    "lint": "eslint .",
-    "preview": "vite preview",
-    "analog-linear-regression": "tsx dev/analog-linear-regression.ts",
-    "serial-logger": "tsx dev/serial-logger.ts"
-  },
-  "dependencies": {
-    "@types/serialport": "^8.0.5",
-    "dotenv": "^17.2.3",
-    "react": "^19.2.0",
-    "react-dom": "^19.2.0",
-    "serialport": "^13.0.0"
-  },
-  "devDependencies": {
-    "@eslint/js": "^9.39.1",
-    "@types/node": "^24.10.1",
-    "@types/react": "^19.2.5",
-    "@types/react-dom": "^19.2.3",
-    "@vitejs/plugin-react": "^5.1.1",
-    "eslint": "^9.39.1",
-    "eslint-plugin-react-hooks": "^7.0.1",
-    "eslint-plugin-react-refresh": "^0.4.24",
-    "globals": "^16.5.0",
-    "tsx": "^4.21.0",
-    "typescript": "~5.9.3",
-    "typescript-eslint": "^8.46.4",
-    "vite": "^7.2.4"
-  }
+    "name": "esp32-temp-humidity-gas-sensor",
+    "private": true,
+    "version": "0.0.0",
+    "type": "module",
+    "scripts": {
+        "analog-linear-regression": "tsx dev/analog-linear-regression.ts",
+        "build": "tsc -b && vite build",
+        "dev": "vite",
+        "init": "npm install",
+        "lint": "eslint .",
+        "preview": "vite preview",
+        "proteus": "tsx scripts/open-proteus.ts",
+        "serial-logger": "tsx dev/serial-logger.ts"
+    },
+    "dependencies": {
+        "@types/serialport": "^8.0.5",
+        "child_process": "^1.0.2",
+        "dotenv": "^17.2.3",
+        "fs": "^0.0.1-security",
+        "open": "^11.0.0",
+        "path": "^0.12.7",
+        "react": "^19.2.0",
+        "react-dom": "^19.2.0",
+        "serialport": "^13.0.0"
+    },
+    "devDependencies": {
+        "@eslint/js": "^9.39.1",
+        "@types/node": "^24.10.9",
+        "@types/react": "^19.2.5",
+        "@types/react-dom": "^19.2.3",
+        "@vitejs/plugin-react": "^5.1.1",
+        "eslint": "^9.39.1",
+        "eslint-plugin-react-hooks": "^7.0.1",
+        "eslint-plugin-react-refresh": "^0.4.24",
+        "globals": "^16.5.0",
+        "tsx": "^4.21.0",
+        "typescript": "~5.9.3",
+        "typescript-eslint": "^8.46.4",
+        "vite": "^7.2.4"
+    }
 }
