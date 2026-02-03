@@ -5,9 +5,9 @@
     "type": "module",
     "scripts": {
         "analog-linear-regression": "tsx dev/analog-linear-regression.ts",
+        "format": "prettier --write . --tab-width 4",
         "frontend": "cd frontend && npm run dev",
-        "format": "prettier --write \"**/*.ts\" \"**/*.tsx\" \"**/*.json\" --tab-width 4 .",
-        "init": "npm install",
+        "init": "npm install && cd backend && npm install && cd ../frontend && npm install",
         "proteus": "tsx scripts/open-proteus.ts",
         "serial-logger": "tsx dev/serial-logger.ts"
     },
