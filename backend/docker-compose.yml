@@ -1,108 +1,112 @@
-version: '3.8'
+version: "3.8"
 
 services:
-  postgres:
-    image: postgres:15-alpine
-    container_name: ${PROJECT_NAME:-esp32-sensors}-db
-    restart: unless-stopped
-    environment:
-      POSTGRES_USER: ${POSTGRES_USER:-triple_sensor_admin}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change_this_secure_password}
-      POSTGRES_DB: ${POSTGRES_DB:-triple_sensor_db}
-      PGDATA: /var/lib/postgresql/data/pgdata
-    ports:
-      - "${POSTGRES_PORT:-5432}:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
-      - ./docker/postgres/postgresql.conf:/etc/postgresql/postgresql.conf
-    command: postgres -c config_file=/etc/postgresql/postgresql.conf
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-triple_sensor_admin}"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
-    networks:
-      - sensor-network
+    postgres:
+        image: postgres:15-alpine
+        container_name: ${PROJECT_NAME:-esp32-sensors}-db
+        restart: unless-stopped
+        environment:
+            POSTGRES_USER: ${POSTGRES_USER:-triple_sensor_admin}
+            POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change_this_secure_password}
+            POSTGRES_DB: ${POSTGRES_DB:-triple_sensor_db}
+            PGDATA: /var/lib/postgresql/data/pgdata
+        ports:
+            - "${POSTGRES_PORT:-5432}:5432"
+        volumes:
+            - postgres_data:/var/lib/postgresql/data
+            - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+            - ./docker/postgres/postgresql.conf:/etc/postgresql/postgresql.conf
+        command: postgres -c config_file=/etc/postgresql/postgresql.conf
+        healthcheck:
+            test:
+                [
+                    "CMD-SHELL",
+                    "pg_isready -U ${POSTGRES_USER:-triple_sensor_admin}",
+                ]
+            interval: 10s
+            timeout: 5s
+            retries: 5
+            start_period: 30s
+        networks:
+            - sensor-network
 
-  pgadmin:
-    image: dpage/pgadmin4
-    container_name: ${PROJECT_NAME:-esp32-sensors}-pgadmin
-    restart: unless-stopped
-    environment:
-      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@sensor.local}
-      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-change_this_admin_password}
-      PGADMIN_CONFIG_SERVER_MODE: 'False'
-      PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: 'False'
-    ports:
-      - "${PGADMIN_PORT:-5050}:80"
-    volumes:
-      - pgadmin_data:/var/lib/pgadmin
-      - ./docker/pgadmin/servers.json:/pgadmin4/servers.json
-    depends_on:
-      postgres:
-        condition: service_healthy
-    networks:
-      - sensor-network
+    pgadmin:
+        image: dpage/pgadmin4
+        container_name: ${PROJECT_NAME:-esp32-sensors}-pgadmin
+        restart: unless-stopped
+        environment:
+            PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@sensor.local}
+            PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-change_this_admin_password}
+            PGADMIN_CONFIG_SERVER_MODE: "False"
+            PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: "False"
+        ports:
+            - "${PGADMIN_PORT:-5050}:80"
+        volumes:
+            - pgadmin_data:/var/lib/pgadmin
+            - ./docker/pgadmin/servers.json:/pgadmin4/servers.json
+        depends_on:
+            postgres:
+                condition: service_healthy
+        networks:
+            - sensor-network
 
-  # Optional: Add Redis for caching or real-time features
-  redis:
-    image: redis:7-alpine
-    container_name: ${PROJECT_NAME:-esp32-sensors}-redis
-    restart: unless-stopped
-    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-change_this_redis_password}
-    ports:
-      - "${REDIS_PORT:-6379}:6379"
-    volumes:
-      - redis_data:/data
-    healthcheck:
-      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
-      interval: 10s
-      timeout: 3s
-      retries: 5
-    networks:
-      - sensor-network
+    # Optional: Add Redis for caching or real-time features
+    redis:
+        image: redis:7-alpine
+        container_name: ${PROJECT_NAME:-esp32-sensors}-redis
+        restart: unless-stopped
+        command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-change_this_redis_password}
+        ports:
+            - "${REDIS_PORT:-6379}:6379"
+        volumes:
+            - redis_data:/data
+        healthcheck:
+            test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+            interval: 10s
+            timeout: 3s
+            retries: 5
+        networks:
+            - sensor-network
 
-  # Optional: Add API backend service
-  api:
-    build:
-      context: ./server
-      dockerfile: Dockerfile
-      args:
-        - NODE_ENV=${NODE_ENV:-production}
-    container_name: ${PROJECT_NAME:-esp32-sensors}-api
-    restart: unless-stopped
-    environment:
-      - NODE_ENV=${NODE_ENV:-production}
-      - DATABASE_URL=postgresql://${POSTGRES_USER:-triple_sensor_admin}:${POSTGRES_PASSWORD:-change_this_secure_password}@postgres:5432/${POSTGRES_DB:-triple_sensor_db}?schema=public
-      - REDIS_URL=redis://:${REDIS_PASSWORD:-change_this_redis_password}@redis:6379
-      - PORT=${API_PORT:-3000}
-      - JWT_SECRET=${JWT_SECRET:-change_this_jwt_secret_key}
-      - CORS_ORIGIN=${CORS_ORIGIN:-http://localhost:5173}
-    ports:
-      - "${API_PORT:-3000}:3000"
-    volumes:
-      - ./server:/app
-      - /app/node_modules
-    depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    networks:
-      - sensor-network
-    command: sh -c "npx prisma migrate deploy && npm run start"
+    # Optional: Add API backend service
+    api:
+        build:
+            context: ./server
+            dockerfile: Dockerfile
+            args:
+                - NODE_ENV=${NODE_ENV:-production}
+        container_name: ${PROJECT_NAME:-esp32-sensors}-api
+        restart: unless-stopped
+        environment:
+            - NODE_ENV=${NODE_ENV:-production}
+            - DATABASE_URL=postgresql://${POSTGRES_USER:-triple_sensor_admin}:${POSTGRES_PASSWORD:-change_this_secure_password}@postgres:5432/${POSTGRES_DB:-triple_sensor_db}?schema=public
+            - REDIS_URL=redis://:${REDIS_PASSWORD:-change_this_redis_password}@redis:6379
+            - PORT=${API_PORT:-3000}
+            - JWT_SECRET=${JWT_SECRET:-change_this_jwt_secret_key}
+            - CORS_ORIGIN=${CORS_ORIGIN:-http://localhost:5173}
+        ports:
+            - "${API_PORT:-3000}:3000"
+        volumes:
+            - ./server:/app
+            - /app/node_modules
+        depends_on:
+            postgres:
+                condition: service_healthy
+            redis:
+                condition: service_healthy
+        networks:
+            - sensor-network
+        command: sh -c "npx prisma migrate deploy && npm run start"
 
 volumes:
-  postgres_data:
-    name: ${PROJECT_NAME:-esp32-sensors}-postgres-data
-  pgadmin_data:
-    name: ${PROJECT_NAME:-esp32-sensors}-pgadmin-data
-  redis_data:
-    name: ${PROJECT_NAME:-esp32-sensors}-redis-data
+    postgres_data:
+        name: ${PROJECT_NAME:-esp32-sensors}-postgres-data
+    pgadmin_data:
+        name: ${PROJECT_NAME:-esp32-sensors}-pgadmin-data
+    redis_data:
+        name: ${PROJECT_NAME:-esp32-sensors}-redis-data
 
 networks:
-  sensor-network:
-    name: ${PROJECT_NAME:-esp32-sensors}-network
-    driver: bridge
+    sensor-network:
+        name: ${PROJECT_NAME:-esp32-sensors}-network
+        driver: bridge

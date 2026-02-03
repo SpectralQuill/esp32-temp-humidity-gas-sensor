@@ -6,6 +6,7 @@
     "scripts": {
         "analog-linear-regression": "tsx dev/analog-linear-regression.ts",
         "frontend": "cd frontend && npm run dev",
+        "format": "prettier --write \"**/*.ts\" \"**/*.tsx\" \"**/*.json\" --tab-width 4 .",
         "init": "npm install",
         "proteus": "tsx scripts/open-proteus.ts",
         "serial-logger": "tsx dev/serial-logger.ts"
@@ -21,6 +22,7 @@
     },
     "devDependencies": {
         "@types/node": "^24.10.9",
+        "prettier": "^3.8.1",
         "tsx": "^4.21.0",
         "typescript": "~5.9.3"
     }
