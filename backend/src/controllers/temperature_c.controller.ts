@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import { TemperatureCService } from "../services/temperature_c.service";
 import { validationResult } from "express-validator";
 
-export class TemperatureController {
+export class TemperatureCController {
     static async create(req: Request, res: Response) {
         try {
             const errors = validationResult(req);

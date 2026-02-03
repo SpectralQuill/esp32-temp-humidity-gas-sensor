@@ -10,10 +10,10 @@ enum SensorReadingType {
 
 export class StatisticsService {
     static async getAll(params: PaginationParams = {}): Promise<AllReadings[]> {
-        const temperaturesC = await TemperatureCService.getAll(params),
-            humidities = await HumidityService.getAll(params),
-            gases = await GasService.getAll(params),
-            readingsByTime = new Map<string, AllReadings>();
+        const temperaturesC = await TemperatureCService.getAll(params);
+        const humidities = await HumidityService.getAll(params);
+        const gases = await GasService.getAll(params);
+        const readingsByTime = new Map<string, AllReadings>();
         [temperaturesC, humidities, gases].forEach(
             (readingsArray, SensorReadingTypeIndex) =>
                 readingsArray.forEach((reading) => {
