@@ -5,6 +5,7 @@
     "type": "module",
     "scripts": {
         "analog-linear-regression": "tsx dev/analog-linear-regression.ts",
+        "frontend": "cd frontend && npm run dev",
         "init": "npm install",
         "proteus": "tsx scripts/open-proteus.ts",
         "serial-logger": "tsx dev/serial-logger.ts"
