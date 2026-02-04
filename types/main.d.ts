@@ -24,3 +24,15 @@ interface AllReadings {
     gas?: GasReading;
     timestamp?: Date;
 }
+
+interface ApiResponse<T> {
+  success: boolean;
+  data: T;
+  message?: string;
+  timestamp: string;
+}
+
+interface ApiConfig {
+  baseURL: string;
+  apiKey?: string;
+}
