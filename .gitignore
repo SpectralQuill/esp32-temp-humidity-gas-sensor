@@ -152,3 +152,7 @@ __pycache__/
 
 # Excel
 ~$*.xlsx
+
+# Databases
+database/*.db
+database/*.db.backup
