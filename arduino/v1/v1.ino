@@ -1,5 +1,6 @@
 // Configuration constants
-const unsigned long LOOP_INTERVAL = 500; // milliseconds
+const unsigned long LOOP_INTERVAL = 125; // milliseconds
+// const unsigned long LOG_INTERVAL = 1000;
 const unsigned long BAUD_RATE = 115200;
 
 // Sensor pins based on CSV data
@@ -118,12 +119,12 @@ class SensorsReader {
     }
     
     void printReadings() {
-      Serial.print("{temp_c:");
+      Serial.print("{\"temperature_c\":");
       Serial.print(currentTempC);
-      Serial.print(",humidity:");
-      Serial.print(currentHumidity / 100.0);
-      Serial.print(",gas:");
-      Serial.print(currentGas / 100.0);
+      Serial.print(",\"humidity\":");
+      Serial.print(currentHumidity);
+      Serial.print(",\"gas\":");
+      Serial.print(currentGas);
       Serial.println("}");
     }
     
@@ -253,6 +254,7 @@ class LcdController {
 // ============================================
 SensorsReader sensors;
 LcdController* lcdController;
+// unsigned long loopTracker = 0;
 
 // ============================================
 // Setup & Loop
@@ -271,4 +273,9 @@ void loop() {
   lcdController->scanReadingUpdates();
   lcdController->scanModeUpdates();
   delay(LOOP_INTERVAL);
+  // loopTracker += LOOP_INTERVAL;
+  // if(loopTracker >= LOG_INTERVAL) {
+  //   loopTracker = 0;
+
+  // }
 }

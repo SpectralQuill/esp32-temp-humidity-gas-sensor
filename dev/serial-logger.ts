@@ -3,9 +3,9 @@ import { ReadlineParser } from "@serialport/parser-readline";
 import * as dotenv from "dotenv";
 
 dotenv.config();
-const PORT_NAME = process.env.PORT_NAME;
-const BAUD_RATE = process.env.BAUD_RATE
-    ? parseInt(process.env.BAUD_RATE)
+const PORT_NAME = process.env.SERIAL_PORT;
+const BAUD_RATE = process.env.SERIAL_BAUD_RATE
+    ? parseInt(process.env.SERIAL_BAUD_RATE)
     : undefined;
 
 console.log(`Starting Serial Logger for ${PORT_NAME} at ${BAUD_RATE} baud`);
@@ -15,12 +15,12 @@ console.log("Press Ctrl+C to exit\n");
 const port = new SerialPort({
     path: PORT_NAME,
     baudRate: BAUD_RATE,
-    dataBits: process.env.DATA_BITS
-        ? parseInt(process.env.DATA_BITS)
+    dataBits: process.env.SERIAL_DATA_BITS
+        ? parseInt(process.env.SERIAL_DATA_BITS)
         : undefined,
-    parity: process.env.PARITY || "none",
-    stopBits: process.env.STOP_BITS
-        ? parseInt(process.env.STOP_BITS)
+    parity: process.env.SERIAL_PARITY || "none",
+    stopBits: process.env.SERIAL_STOP_BITS
+        ? parseInt(process.env.SERIAL_STOP_BITS)
         : undefined,
     autoOpen: true,
 });

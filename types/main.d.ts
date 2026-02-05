@@ -1,38 +1,28 @@
+type SensorReadingType = "temperature_c" | "humidity" | "gas";
+
 interface SensorReading {
-    id: string;
-    value: number;
     createdAt: Date;
-    updatedAt: Date;
+    readingType: SensorReadingType;
+    value: number
 }
 
-type TemperatureCReading = SensorReading;
-
-type HumidityReading = SensorReading;
-
-type GasReading = SensorReading;
-
-interface PaginationParams {
-    limit?: number;
-    offset?: number;
-    startDate?: Date;
-    endDate?: Date;
+interface DBSensorReading {
+  createdAt: string;  // ISO string
+  readingType: SensorReadingType;
+  value: number;
 }
 
-interface AllReadings {
-    temperatureC?: TemperatureCReading;
-    humidity?: HumidityReading;
-    gas?: GasReading;
-    timestamp?: Date;
+interface BatchSensorReadingsResult {
+  createdAt: Date;
+  temperatureC?: SensorReading;
+  humidity?: SensorReading;
+  gas?: SensorReading;
 }
 
-interface ApiResponse<T> {
-  success: boolean;
-  data: T;
-  message?: string;
-  timestamp: string;
-}
-
-interface ApiConfig {
-  baseURL: string;
-  apiKey?: string;
+interface Esp32Data {
+  temperature_c?: number;
+  humidity?: number;
+  gas?: number;
+  raw?: string;
+  timestamp?: Date;
 }
