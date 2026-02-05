@@ -1,38 +1,38 @@
-export interface SensorReadingOld {
+interface SensorReadingOld {
     id: string;
     value: number;
     createdAt: Date;
     updatedAt: Date;
 }
 
-export type TemperatureCReading = SensorReadingOld;
+type TemperatureCReading = SensorReadingOld;
 
-export type HumidityReading = SensorReadingOld;
+type HumidityReading = SensorReadingOld;
 
-export type GasReading = SensorReadingOld;
+type GasReading = SensorReadingOld;
 
-export interface PaginationParams {
+interface PaginationParams {
     limit?: number;
     offset?: number;
     startDate?: Date;
     endDate?: Date;
 }
 
-export interface AllReadings {
+interface AllReadings {
     temperatureC?: TemperatureCReading;
     humidity?: HumidityReading;
     gas?: GasReading;
     timestamp?: Date;
 }
 
-export interface ApiResponse<T> {
+interface ApiResponse<T> {
   success: boolean;
   data: T;
   message?: string;
   timestamp: string;
 }
 
-export interface ApiConfig {
+interface ApiConfig {
   baseURL: string;
   apiKey?: string;
 }
