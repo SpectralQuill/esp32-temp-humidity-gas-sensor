@@ -133,7 +133,7 @@ const Dashboard: React.FC = () => {
             // Process temperature data and add boundary points
             const processedTempData = addBoundaryPoints(
                 tempRes.data,
-                "temperature_c",
+                "temperatureC",
                 startDate,
                 endDate,
             );

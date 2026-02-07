@@ -34,7 +34,7 @@ export class SensorDatabase {
         await this.exec(`
       CREATE TABLE IF NOT EXISTS sensor_readings (
         createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
-        readingType TEXT NOT NULL CHECK (readingType IN ('temperature_c', 'humidity', 'gas')),
+        readingType TEXT NOT NULL CHECK (readingType IN ('temperatureC', 'humidity', 'gas')),
         value REAL NOT NULL
       );
       
@@ -150,7 +150,7 @@ export class SensorDatabase {
         if (temperatureC) {
             await this.createReading(
                 timestamp,
-                "temperature_c",
+                "temperatureC",
                 temperatureC.value,
             );
             readings.push({ ...temperatureC, createdAt: timestamp });
@@ -173,7 +173,7 @@ export class SensorDatabase {
 
         readings.forEach((reading) => {
             switch (reading.readingType) {
-                case "temperature_c":
+                case "temperatureC":
                     result.temperatureC = reading;
                     break;
                 case "humidity":
@@ -212,7 +212,7 @@ export class SensorDatabase {
 
         return {
             temperaturesC: readings.filter(
-                (r) => r.readingType === "temperature_c",
+                (r) => r.readingType === "temperatureC",
             ),
             humidities: readings.filter((r) => r.readingType === "humidity"),
             gases: readings.filter((r) => r.readingType === "gas"),
@@ -224,7 +224,7 @@ export class SensorDatabase {
         startDate: Date,
         endDate: Date,
     ): Promise<SensorReading[]> {
-        return this.getReadingsByType("temperature_c", startDate, endDate);
+        return this.getReadingsByType("temperatureC", startDate, endDate);
     }
 
     // API Method 5: Get humidity readings within date range
@@ -317,7 +317,7 @@ export class SensorDatabase {
         humidity?: SensorReading;
         gas?: SensorReading;
     }> {
-        const types: SensorReadingType[] = ["temperature_c", "humidity", "gas"];
+        const types: SensorReadingType[] = ["temperatureC", "humidity", "gas"];
         const result: any = {};
 
         for (const type of types) {
@@ -331,7 +331,7 @@ export class SensorDatabase {
             );
 
             if (reading) {
-                const key = type === "temperature_c" ? "temperatureC" : type;
+                const key = type === "temperatureC" ? "temperatureC" : type;
                 result[key] = this.convertDBToSensorReading(reading);
             }
         }

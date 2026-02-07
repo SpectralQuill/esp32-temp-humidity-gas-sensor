@@ -48,11 +48,11 @@ class SerialListener {
 
     // Track current values for each reading type
     private currentValues: {
-        temperature_c: number | null;
+        temperatureC: number | null;
         humidity: number | null;
         gas: number | null;
     } = {
-        temperature_c: null,
+        temperatureC: null,
         humidity: null,
         gas: null,
     };
@@ -187,13 +187,13 @@ class SerialListener {
 
                 // Update current values with latest from database
                 if (latestReadings.temperatureC) {
-                    this.currentValues.temperature_c =
+                    this.currentValues.temperatureC =
                         latestReadings.temperatureC.value;
                     console.log(
                         `🌡️  Latest temperature from DB: ${latestReadings.temperatureC.value}°C`,
                     );
                 } else {
-                    this.currentValues.temperature_c = null;
+                    this.currentValues.temperatureC = null;
                     console.log("🌡️  No temperature reading in database");
                 }
 
@@ -238,7 +238,7 @@ class SerialListener {
 
     private setEmptyValues(): void {
         this.currentValues = {
-            temperature_c: null,
+            temperatureC: null,
             humidity: null,
             gas: null,
         };
@@ -262,9 +262,9 @@ class SerialListener {
             const sensorData: Esp32Data = {
                 raw: rawData,
                 timestamp,
-                temperature_c:
-                    jsonData.temperature_c !== undefined
-                        ? parseFloat(jsonData.temperature_c)
+                temperatureC:
+                    jsonData.temperatureC !== undefined
+                        ? parseFloat(jsonData.temperatureC)
                         : undefined,
                 humidity:
                     jsonData.humidity !== undefined
@@ -277,7 +277,7 @@ class SerialListener {
             };
 
             if (
-                sensorData.temperature_c !== undefined ||
+                sensorData.temperatureC !== undefined ||
                 sensorData.humidity !== undefined ||
                 sensorData.gas !== undefined
             ) {
@@ -297,15 +297,15 @@ class SerialListener {
         const payload: any = {};
 
         // Check each value for changes
-        if (sensorData.temperature_c !== undefined) {
-            if (sensorData.temperature_c <= 40) {
+        if (sensorData.temperatureC !== undefined) {
+            if (sensorData.temperatureC <= 40) {
                 if (
-                    this.currentValues.temperature_c === null ||
-                    this.currentValues.temperature_c !==
-                        sensorData.temperature_c
+                    this.currentValues.temperatureC === null ||
+                    this.currentValues.temperatureC !==
+                        sensorData.temperatureC
                 ) {
-                    this.currentValues.temperature_c = sensorData.temperature_c;
-                    payload.temperature_c = sensorData.temperature_c;
+                    this.currentValues.temperatureC = sensorData.temperatureC;
+                    payload.temperatureC = sensorData.temperatureC;
                     hasChanges.push(true);
                 }
             }

@@ -1,0 +1,8 @@
+@use "variables" as *;
+@forward "./global.scss";
+
+header {
+    > * {
+        display: inline-block;
+    }
+}

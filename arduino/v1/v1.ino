@@ -119,7 +119,7 @@ class SensorsReader {
     }
     
     void printReadings() {
-      Serial.print("{\"temperature_c\":");
+      Serial.print("{\"temperatureC\":");
       Serial.print(currentTempC);
       Serial.print(",\"humidity\":");
       Serial.print(currentHumidity);

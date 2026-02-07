@@ -40,9 +40,9 @@ app.post("/api/reading", async (req, res) => {
             });
         }
 
-        if (!["temperature_c", "humidity", "gas"].includes(readingType)) {
+        if (!["temperatureC", "humidity", "gas"].includes(readingType)) {
             return res.status(400).json({
-                error: "Invalid readingType. Must be temperature_c, humidity, or gas",
+                error: "Invalid readingType. Must be temperatureC, humidity, or gas",
             });
         }
 
@@ -237,16 +237,16 @@ app.get("/api/readings/latest", async (req, res) => {
 // ESP32 compatible endpoint
 app.post("/api/esp32/readings", async (req, res) => {
     try {
-        const { temperature_c, humidity, gas } = req.body;
+        const { temperatureC, humidity, gas } = req.body;
         const createdAt = new Date();
 
         const readings: any = {};
 
-        if (temperature_c !== undefined) {
+        if (temperatureC !== undefined) {
             readings.temperatureC = {
                 createdAt,
-                readingType: "temperature_c" as const,
-                value: parseFloat(temperature_c),
+                readingType: "temperatureC" as const,
+                value: parseFloat(temperatureC),
             };
         }
 

@@ -1,4 +1,14 @@
-type SensorReadingType = "temperature_c" | "humidity" | "gas";
+type SensorReadingType = "temperatureC" | "humidity" | "gas";
+
+// Initial for backend
+
+interface Esp32Data {
+    temperatureC?: number;
+    humidity?: number;
+    gas?: number;
+    raw?: string;
+    timestamp?: Date;
+}
 
 interface SensorReading {
     createdAt: Date;
@@ -17,12 +27,4 @@ interface BatchSensorReadingsResult {
     temperatureC?: SensorReading;
     humidity?: SensorReading;
     gas?: SensorReading;
-}
-
-interface Esp32Data {
-    temperature_c?: number;
-    humidity?: number;
-    gas?: number;
-    raw?: string;
-    timestamp?: Date;
 }

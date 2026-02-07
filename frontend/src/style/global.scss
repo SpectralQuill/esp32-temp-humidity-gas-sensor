@@ -1,10 +1,14 @@
 @use "variables" as *;
 
-// Body
+// Body and root
 
 body {
     margin: 0;
     background: $primary-color;
+}
+
+#root {
+    width: 100vw;
 }
 
 // General
@@ -17,17 +21,26 @@ body {
 
 .font-large {
     color: $secondary-color;
-    font: 24px/1.5 Helvetica, sans-serif;
+    font:
+        24px/1.5 Helvetica,
+        sans-serif;
 }
 
 .font-medium {
     color: $secondary-color;
-    font: 16px/1.5 Helvetica, sans-serif;
+    font:
+        16px/1.5 Helvetica,
+        sans-serif;
 }
 
 // Headers
 
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
     margin: 0;
 }
 
@@ -42,7 +55,8 @@ button {
 
 // Lists
 
-ol, ul {
+ol,
+ul {
     margin: 0;
 }
 

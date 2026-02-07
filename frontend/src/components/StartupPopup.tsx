@@ -14,67 +14,79 @@ interface ConnectionStatusListItemProps {
 }
 
 interface StartupPopupProps {
-    simulateDatabaseConnection?: boolean;
-    simulateSerialConnection?: boolean;
+    databaseAttemptSimulationsCount?: number;
+    serialAttemptSimulationsCount?: number;
 }
 
 const CONNECTION_INTERVAL_MS: number = 1000;
-const CONNECTION_SIMULATION_ATTEMPTS: number = 3;
-const SUCCESS_CONNECTION_TIMEOUT_MS: number = 1000;
+const POPUP_CLOSE_TIMEOUT_MS: number = 1000;
 
 export function StartupPopup(props: StartupPopupProps) {
-
+    const { databaseAttemptSimulationsCount, serialAttemptSimulationsCount } =
+        props;
     const isConnectedToDatabase = useConnection(
         connectToDatabase,
         CONNECTION_INTERVAL_MS,
-        props.simulateDatabaseConnection ? CONNECTION_SIMULATION_ATTEMPTS : undefined
+        databaseAttemptSimulationsCount,
     );
     const isConnectedToSerial = useConnection(
         connectToSerial,
         CONNECTION_INTERVAL_MS,
-        props.simulateSerialConnection ? CONNECTION_SIMULATION_ATTEMPTS : undefined
+        serialAttemptSimulationsCount,
     );
     const [isVisible, setIsVisible] = useState(true);
 
     useEffect(() => {
-
         if (!isConnectedToDatabase || !isConnectedToSerial) return;
-        const timeoutId = setTimeout(() => setIsVisible(false), SUCCESS_CONNECTION_TIMEOUT_MS);
+        const timeoutId = setTimeout(
+            () => setIsVisible(false),
+            POPUP_CLOSE_TIMEOUT_MS,
+        );
         return () => clearTimeout(timeoutId);
-
     }, [isConnectedToDatabase, isConnectedToSerial]);
 
     if (!isVisible) return <></>;
 
-    return <Popup className="startup-popup" visible={isVisible} isUnclosable={true}>
-        <h2>Welcome to the ESP32 Sensor Dashboard!</h2>
-        <ul className="no-list-style font-medium">
-            <ConnectionStatusListItem
-                isConnected={isConnectedToDatabase}
-                connectionTarget="database"
-            />
-            <ConnectionStatusListItem
-                isConnected={isConnectedToSerial}
-                connectionTarget="serial port"
-            />
-        </ul>
-    </Popup>;
+    return (
+        <Popup
+            className="startup-popup"
+            visible={isVisible}
+            isUnclosable={true}
+        >
+            <h2>Welcome to the ESP32 Sensor Dashboard!</h2>
+            <ul className="no-list-style font-medium">
+                <ConnectionStatusListItem
+                    isConnected={isConnectedToDatabase}
+                    connectionTarget="database"
+                />
+                <ConnectionStatusListItem
+                    isConnected={isConnectedToSerial}
+                    connectionTarget="serial port"
+                />
+            </ul>
+        </Popup>
+    );
 }
 
+/** * A list item component that displays the connection status to a specific target with an appropriate icon and loading text.
+ * @param isConnected - A boolean indicating whether the connection is established.
+ * @param connectionTarget - A string representing the target of the connection (e.g., "database", "serial port").
+ * @returns A JSX element representing the connection status list item.
+ */
 function ConnectionStatusListItem(props: ConnectionStatusListItemProps) {
-
     const { isConnected, connectionTarget } = props;
     const loadingText = useLoadingText();
     const icon = isConnected ? faSolidCircleCheck : faRegularCircleCheck;
 
-    return <li>
-        <FontAwesomeIcon icon={icon}/>
-        {isConnected ? "Connected" : "Connecting"}
-        <> to </>
-        {connectionTarget}
-        {isConnected || loadingText}
-    </li>;
-    
+    return (
+        <li>
+            <FontAwesomeIcon icon={icon} />
+            {isConnected ? "Connected" : "Connecting"}
+            <> to </>
+            {connectionTarget}
+            {isConnected || loadingText}
+        </li>
+    );
 }
 
 async function connectToDatabase(): Promise<boolean> {

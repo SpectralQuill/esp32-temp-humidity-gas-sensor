@@ -12,7 +12,7 @@ async function testAPI() {
         console.log("1️⃣ Testing createReading...");
         const reading1 = await sensorDB.createReading(
             new Date("2024-01-15T10:00:00Z"),
-            "temperature_c",
+            "temperatureC",
             25.5,
         );
         console.log("✅ Created:", reading1);
@@ -22,7 +22,7 @@ async function testAPI() {
         const batchResult = await sensorDB.createReadings(
             {
                 createdAt: new Date("2024-01-15T10:05:00Z"),
-                readingType: "temperature_c",
+                readingType: "temperatureC",
                 value: 26.0,
             },
             {
