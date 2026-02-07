@@ -1,0 +1,52 @@
+@use "variables" as *;
+
+// Body
+
+body {
+    margin: 0;
+    background: $primary-color;
+}
+
+// General
+
+.hidden {
+    display: none;
+}
+
+// Fonts
+
+.font-large {
+    color: $secondary-color;
+    font: 24px/1.5 Helvetica, sans-serif;
+}
+
+.font-medium {
+    color: $secondary-color;
+    font: 16px/1.5 Helvetica, sans-serif;
+}
+
+// Headers
+
+h1, h2, h3, h4, h5, h6 {
+    margin: 0;
+}
+
+// Buttons
+
+button {
+    outline: 0;
+    border: none;
+    background: none;
+    padding: 0;
+}
+
+// Lists
+
+ol, ul {
+    margin: 0;
+}
+
+.no-list-style {
+    list-style: none;
+    padding: 0;
+}

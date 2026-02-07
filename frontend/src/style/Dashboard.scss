@@ -1,3 +1,2 @@
-@use './variables.scss';
-@forward './global.scss';
-
+@use "variables" as *;
+@forward "./global.scss";

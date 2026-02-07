@@ -1,7 +1,2 @@
-@use 'variables' as *;
-@forward './global.scss';
-
-body {
-    margin: 0;
-    background: $primary-color;
-}
+@use "variables" as *;
+@forward "./global.scss";

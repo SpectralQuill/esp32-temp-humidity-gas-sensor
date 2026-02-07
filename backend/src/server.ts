@@ -35,19 +35,15 @@ app.post("/api/reading", async (req, res) => {
 
         // Validate input
         if (!createdAt || !readingType || value === undefined) {
-            return res
-                .status(400)
-                .json({
-                    error: "Missing required fields: createdAt, readingType, value",
-                });
+            return res.status(400).json({
+                error: "Missing required fields: createdAt, readingType, value",
+            });
         }
 
         if (!["temperature_c", "humidity", "gas"].includes(readingType)) {
-            return res
-                .status(400)
-                .json({
-                    error: "Invalid readingType. Must be temperature_c, humidity, or gas",
-                });
+            return res.status(400).json({
+                error: "Invalid readingType. Must be temperature_c, humidity, or gas",
+            });
         }
 
         if (typeof value !== "number" || isNaN(value)) {
@@ -74,11 +70,9 @@ app.post("/api/readings", async (req, res) => {
 
         // At least one reading must be provided
         if (!temperatureC && !humidity && !gas) {
-            return res
-                .status(400)
-                .json({
-                    error: "At least one reading (temperatureC, humidity, or gas) must be provided",
-                });
+            return res.status(400).json({
+                error: "At least one reading (temperatureC, humidity, or gas) must be provided",
+            });
         }
 
         const result = await sensorDB.createReadings(
