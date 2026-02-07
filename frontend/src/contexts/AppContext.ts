@@ -1,17 +1,19 @@
-import { ChartData } from "recharts/types/state/chartDataSlice";
 import { createContext } from "react";
+import { SensorChartData } from "../components/SensorChart";
 
 export interface AppContextProps {
-    chartData: ChartData;
-    setChartData: (chartData: ChartData) => void;
+    sensorChartData: SensorChartData;
     endDate: Date;
     setEndDate: (endDate: Date) => void;
+    isConnectedToDatabase: boolean;
+    setIsConnectedToDatabase: (isConnected: boolean) => void;
     startDate: Date;
     setStartDate: (startDate: Date) => void;
 }
 
 export const AppContext = createContext<AppContextProps>({
-    chartData: [], setChartData: () => {},
+    sensorChartData: [],
     endDate: new Date(), setEndDate: () => {},
+    isConnectedToDatabase: false, setIsConnectedToDatabase: () => {},
     startDate: new Date(), setStartDate: () => {}
 });

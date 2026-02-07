@@ -22,10 +22,8 @@ export function Dashboard() {
                 referenceLines={TEMPERATURE_C_REFERENCE_LINES}
                 unit="°C"
                 yAxisDomain={[
-                    (dataMin: number) =>
-                        Math.min(0, dataMin - 2),
-                    (dataMax: number) =>
-                        Math.max(39, dataMax + 2),
+                    (dataMin: number) => Math.min(0, dataMin - 2),
+                    (dataMax: number) => Math.max(39, dataMax + 2),
                 ]}
                 formatReadingValue={formatTemperatureCValue}
             />

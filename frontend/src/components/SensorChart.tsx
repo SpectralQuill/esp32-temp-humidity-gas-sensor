@@ -36,17 +36,19 @@ export interface SensorChartProps {
     formatReadingValue(value?: number): string;
 }
 
+export type SensorChartData = SensorChartDataPoint[];
+
 export function SensorChart(props: SensorChartProps) {
 
-    const {chartData} = useContext(AppContext);
+    const {sensorChartData} = useContext(AppContext);
     const {
         color, dataKey, readingTypeLabel, referenceLines, unit, yAxisDomain,
         formatReadingValue
     } = props;
 
     return <>
-        <ResponsiveContainer width="100%" height={300}>
-            <AreaChart data={chartData}>
+        <ResponsiveContainer className="sensor-chart" width="100%" height={300}>
+            <AreaChart data={sensorChartData}>
                 <CartesianGrid
                     strokeDasharray="3 3"
                     stroke="#f0f0f0"
@@ -67,6 +69,7 @@ export function SensorChart(props: SensorChartProps) {
                     domain={yAxisDomain}
                 />
                 {referenceLines.map(({color, label, y}) => <ReferenceLine
+                    key={y}
                     y={y}
                     stroke={color}
                     strokeWidth={2}
