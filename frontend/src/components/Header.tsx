@@ -1,4 +1,5 @@
 import { AppContext } from "../contexts/AppContext";
+import { MinuteRangeSelection } from "./MinuteRangeSelection";
 import { useContext } from "react";
 
 import "../style/Header.scss";
@@ -9,6 +10,7 @@ export function Header() {
             <header>
                 <h1 className="font-large">ESP32 Sensor Dashboard</h1>
                 <LevelInformant />
+                <MinuteRangeSelection />
             </header>
         </>
     );

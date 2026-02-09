@@ -11,28 +11,30 @@ export interface SensorChartReferenceLineProps {
 }
 
 export const TEMPERATURE_C_REFERENCE_LINES: SensorChartReferenceLineProps[] = [
-    {color: "#1e90ff", label: "Frost Risk", y: 0},
-    {color: "#4169e1", label: "Very Cold", y: 5},
-    {color: "#6495ed", label: "Cool", y: 12},
-    {color: "#4caf50", label: "Optimal Comfort", y: 20},
+    {color: "#1e90ff", label: "Extreme Cold", y: 0},
+    {color: "#4169e1", label: "Cold", y: 10},
+    {color: "#6495ed", label: "Cool", y: 18},
     {color: "#4caf50", label: "Warm", y: 26},
-    {color: "#ff9800", label: "Hot", y: 30},
-    {color: "#ff4444", label: "Very Hot", y: 35},
-    {color: "#8b0000", label: "Extreme Heat", y: 40}
+    {color: "#ff9800", label: "Hot", y: 32},
+    {color: "#ff4444", label: "Very Hot", y: 38},
+    {color: "#8b0000", label: "Extreme Heat", y: 42}
 ];
 export const HUMIDITY_REFERENCE_LINES: SensorChartReferenceLineProps[] = [
+    {color: "#8b0000", label: "Extremely Dry", y: 0},
+    {color: "#ff4444", label: "Very Dry", y: 20},
     {color: "#ff9800", label: "Dry", y: 30},
-    {color: "#4caf50", label: "Lower Comfort", y: 40},
-    {color: "#4caf50", label: "Upper Comfort", y: 60},
-    {color: "#ff5722", label: "Humid", y: 70},
-    {color: "#ff4444", label: "Too Humid", y: 80}
+    {color: "#4caf50", label: "Optimal (Lower)", y: 40},
+    {color: "#4caf50", label: "Optimal (Upper)", y: 60},
+    {color: "#ff4444", label: "Humid", y: 70},
+    {color: "#8b0000", label: "Extremely Humid", y: 85}
 ];
 export const GAS_REFERENCE_LINES: SensorChartReferenceLineProps[] = [
-    {color: "#4caf50", label: "Good", y: 10},
-    {color: "#ff9800", label: "Poor", y: 20},
-    {color: "#ff5722", label: "Unhealthy", y: 30},
-    {color: "#ff4444", label: "Very Unhealthy", y: 40},
-    {color: "#8b0000", label: "Hazardous", y: 60}
+    {color: "#4caf50", label: "Clean", y: 0},
+    {color: "#4caf50", label: "Trace", y: 10},
+    {color: "#ff9800", label: "Elevated", y: 25},
+    {color: "#ff5722", label: "High", y: 40},
+    {color: "#8b0000", label: "Dangerous", y: 60},
+    {color: "#340000", label: "Critical", y: 80}
 ];
 
 export const GENERAL_SAFETY_LEVELS: GeneralSafetyLevelProps[] = [
@@ -44,20 +46,22 @@ export const GENERAL_SAFETY_LEVELS: GeneralSafetyLevelProps[] = [
     {
         label: "Good",
         color: "#4caf50",
-        range: ["#4caf50"]
+        range: [
+            "#6495ed","#4caf50"
+        ]
     },
     {
         label: "Warning",
         color: "#ff9800",
         range: [
-            "#4169e1", "#6495ed", "#ff9800", "#ff5722", "#ff4444"
+            "#4169e1", "#ff9800", "#ff5722", "#ff4444"
         ]
     },
     {
         label: "Danger",
         color: "#8b0000",
         range: [
-            "#1e90ff", "#8b0000"
+            "#1e90ff", "#8b0000", "#340000"
         ]
     }
 ];

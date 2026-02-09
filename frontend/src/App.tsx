@@ -1,4 +1,5 @@
 import { AppContext, AppContextProps } from "./contexts/AppContext";
+import { DangerPopup } from "./components/DangerPopup";
 import { Dashboard } from "./components/Dashboard";
 import { Header } from "./components/Header";
 import { SensorApi } from "./api/SensorApi";
@@ -18,7 +19,7 @@ const SENSOR_GRAPHS_REFRESH_INTERVAL_MS = 5000;
 
 function App() {
 
-    const [graphRangeBeforeMin, setGraphRangeBeforeMin] = useState<number>(
+    const [graphRangeMin, setGraphRangeMin] = useState<number>(
         DEFAULT_GRAPH_RANGE_BEFORE_MIN
     );
     const isConnectedToDatabase = useConnection(
@@ -27,32 +28,37 @@ function App() {
         DATABASE_CONNECTION_SIMULATIONS_COUNT
     );
     const [startDate, endDate] = useDateRangeRefresher(
-        SENSOR_GRAPHS_REFRESH_INTERVAL_MS, graphRangeBeforeMin, isConnectedToDatabase
+        SENSOR_GRAPHS_REFRESH_INTERVAL_MS, graphRangeMin, isConnectedToDatabase
     );
     const [sensorChartData, sensorChartXTicks, generalSafetyLevel] = useSensorChartData(
         startDate, endDate, isConnectedToDatabase
     );
     const appContext: AppContextProps = {
         generalSafetyLevel,
-        graphRangeBeforeMin, setGraphRangeBeforeMin,
+        graphRangeMin, setGraphRangeMin,
         isConnectedToDatabase,
         sensorChartData, sensorChartXTicks
     }
 
     return (
         <AppContext.Provider value={appContext}>
-            <>
+            <>{/* Content */}
+                <Header />
+                <p>{isConnectedToDatabase ? "Connected" : "Waiting for connection"}</p>
+                <Dashboard />
+            </>
+            <>{/* Popups */}
+                <StartupPopup />
+                <DangerPopup visible={false} />
+            </>
+            <>{/* Variable loggers */}
                 <VariableLogger variable={[startDate, endDate]} visible={false}>
                     Log Dates
                 </VariableLogger>
-                <VariableLogger variable={sensorChartData} visible={true}>
+                <VariableLogger variable={sensorChartData} visible={false}>
                     Log Sensor Data
                 </VariableLogger>
             </>
-            <StartupPopup />
-            <Header />
-            <p>{isConnectedToDatabase ? "Connected" : "Waiting for connection"}</p>
-            <Dashboard />
         </AppContext.Provider>
     );
 }

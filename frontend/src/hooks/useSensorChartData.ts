@@ -109,7 +109,7 @@ function addChartPoint(
     });
 }
 
-function bucketMsToMin(ms: number, bucketMin: number, offsetMin: number) {
+export function bucketMsToMin(ms: number, bucketMin: number, offsetMin: number) {
 
     const bucketMs = bucketMin * 60000;
     const offsetMs = offsetMin * 60000;
@@ -117,7 +117,7 @@ function bucketMsToMin(ms: number, bucketMin: number, offsetMin: number) {
 
 }
 
-function getGeneralSafetyLevel(
+export function getGeneralSafetyLevel(
     temperatureC: number | null,
     humidity: number | null,
     gas: number | null
@@ -133,7 +133,7 @@ function getGeneralSafetyLevel(
             return referenceLine;
         }
         let referenceLineIndex: number = referenceLines.findIndex(
-            ({y: treshold}) => (values[referenceLinesIndex]! <= treshold)
+            ({y: treshold}) => (values[referenceLinesIndex]! < treshold)
         );
         if(referenceLineIndex < 0) return referenceLines[referenceLines.length - 1];
         referenceLineIndex = Math.max(referenceLineIndex - 1, 0);

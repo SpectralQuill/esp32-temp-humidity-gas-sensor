@@ -1,0 +1,12 @@
+@use "variables" as *;
+@forward "./global.scss";
+
+.sensor-chart {
+    
+}
+
+.sensor-tooltip {
+    background: white;
+    padding: 10px;
+    border: 1px solid #ccc;
+}

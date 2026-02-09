@@ -33,6 +33,13 @@ body {
         sans-serif;
 }
 
+.font-small {
+    color: $secondary-color;
+    font:
+        12px/1.5 Helvetica,
+        sans-serif;
+}
+
 // Headers
 
 h1,
@@ -51,6 +58,7 @@ button {
     border: none;
     background: none;
     padding: 0;
+    cursor: pointer;
 }
 
 // Lists

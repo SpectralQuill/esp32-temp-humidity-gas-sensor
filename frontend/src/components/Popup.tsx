@@ -2,7 +2,7 @@ import { ArrayUtils } from "../utils/ArrayUtils";
 import { faX } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { PopupContext, PopupContextProps } from "../contexts/PopupContext";
-import { useContext, useMemo, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 
 import "../style/Popup.scss";
 
@@ -23,21 +23,24 @@ interface PopupProps {
 export function Popup(props: PopupProps) {
 
     const { children, className, isUnclosable } = props;
-
-    const [isVisible, setIsVisible] = useState<boolean>(props.visible ?? false);
-
-    const popupContext = useMemo<PopupContextProps>(() => ({
+    const propsIsVisible = props.visible ?? false;
+    const [isVisible, setIsVisible] = useState<boolean>(propsIsVisible);
+    const popupContext: PopupContextProps = {
         isVisible, setIsVisible
-    }), [
-        isVisible
-    ]);
-
+    };
     const popupWrapperClassName: string = ArrayUtils.filterNotUndefined([
         "popup-wrapper",
         className,
         isVisible ? undefined : "hidden",
     ]).join(" ");
 
+    useEffect(() => {
+
+        setIsVisible(propsIsVisible);
+
+    }, [propsIsVisible]);
+
+    if (!isVisible) return <></>;
     return (
         <PopupContext.Provider value={popupContext}>
             <div className={popupWrapperClassName}>

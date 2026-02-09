@@ -4,6 +4,7 @@ import {
     AreaChart,
     CartesianGrid,
     Legend,
+    Line,
     ReferenceLine,
     ResponsiveContainer,
     Tooltip,
@@ -12,7 +13,9 @@ import {
 } from "recharts";
 import { AxisDomain } from "recharts/types/util/types";
 import { format as formatDate } from "date-fns";
+import { SensorCard } from "./SensorCard";
 import { SensorChartReferenceLineProps } from "../constants/safetyLevels";
+import { SensorTooltip } from "./SensorTooltip";
 import { useContext } from "react";
 
 export interface SensorChartProps {
@@ -34,6 +37,13 @@ export function SensorChart(props: SensorChartProps) {
     const {sensorChartData, sensorChartXTicks} = useContext(AppContext);
 
     return <>
+        <SensorCard
+            color={color}
+            dataKey={dataKey}
+            readingTypeLabel={readingTypeLabel}
+            unit={unit}
+            formatReadingValue={formatReadingValue}
+        />
         <ResponsiveContainer className="sensor-chart" width="100%" height={300}>
             <AreaChart data={sensorChartData}>
                 <CartesianGrid
@@ -71,12 +81,8 @@ export function SensorChart(props: SensorChartProps) {
                         fontSize: 10,
                     }}
                 />)}
-                <Tooltip
-                    formatter={
-                        (value?: number) => ([formatReadingValue(value) + unit, readingTypeLabel])
-                    }
-                    labelFormatter={(timestamp) => formatDate(timestamp as number, "hh:mm:ss a")}
-                />
+                <Tooltip content={ <SensorTooltip /> }/>
+                <Line type="monotone" dataKey="value" stroke={color}/>
                 <Legend />
                 <Area
                     type="monotone"
@@ -95,3 +101,4 @@ export function SensorChart(props: SensorChartProps) {
     </>;
 
 }
+

@@ -24,7 +24,7 @@ export function Dashboard() {
                 unit="°C"
                 yAxisDomain={[
                     (dataMin: number) => Math.min(0, dataMin + 1),
-                    (dataMax: number) => Math.max(42, dataMax + 1),
+                    (dataMax: number) => Math.max(44, dataMax + 1),
                 ]}
                 formatReadingValue={formatTemperatureCValue}
             />
