@@ -14,7 +14,7 @@ import {
 import { AxisDomain } from "recharts/types/util/types";
 import { format as formatDate } from "date-fns";
 import { SensorCard } from "./SensorCard";
-import { SensorChartReferenceLineProps } from "../constants/safetyLevels";
+import { SensorChartReferenceLineProps } from "../utils/SafetyLevel";
 import { SensorTooltip } from "./SensorTooltip";
 import { useContext } from "react";
 
@@ -25,7 +25,7 @@ export interface SensorChartProps {
     referenceLines: SensorChartReferenceLineProps[]
     unit: string;
     yAxisDomain: AxisDomain;
-    formatReadingValue(value?: number): string;
+    formatReadingValue(value?: number | null): string;
 }
 
 export function SensorChart(props: SensorChartProps) {
@@ -81,7 +81,12 @@ export function SensorChart(props: SensorChartProps) {
                         fontSize: 10,
                     }}
                 />)}
-                <Tooltip content={ <SensorTooltip /> }/>
+                <Tooltip content={
+                    <SensorTooltip
+                        unit={unit}
+                        formatReadingValue={formatReadingValue}
+                    />
+                }/>
                 <Line type="monotone" dataKey="value" stroke={color}/>
                 <Legend />
                 <Area

@@ -1,17 +1,19 @@
-import {
-    GAS_REFERENCE_LINES,
-    HUMIDITY_REFERENCE_LINES,
-    TEMPERATURE_C_REFERENCE_LINES
-} from "../constants/safetyLevels";
+import { SafetyLevel } from "../utils/SafetyLevel";
 import { SensorChart } from "./SensorChart";
+
+const {
+    TEMPERATURE_C_REFERENCE_LINES,
+    HUMIDITY_REFERENCE_LINES,
+    GAS_REFERENCE_LINES
+} = SafetyLevel;
 
 export function Dashboard() {
 
-    const formatPercentageValue = (value: number | undefined) =>
-        (value !== undefined) ? value.toFixed(0) : '--'
+    const formatPercentageValue = (value?: number | null) =>
+        (value != null) ? value.toFixed(0) : '--'
     ;
-    const formatTemperatureCValue = (value: number | undefined) =>
-        (value !== undefined) ? value.toFixed(1) : '--'
+    const formatTemperatureCValue = (value?: number | null) =>
+        (value != null) ? value.toFixed(1) : '--'
     ;
 
     return <>

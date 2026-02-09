@@ -2,16 +2,14 @@ import { addMinutes } from "date-fns";
 import { AxisTick } from "recharts/types/util/types";
 import { differenceInMinutes } from "date-fns";
 import {
-    GAS_REFERENCE_LINES,
     GeneralSafetyLevelProps,
-    GENERAL_SAFETY_LEVELS,
-    HUMIDITY_REFERENCE_LINES,
-    SensorChartReferenceLineProps,
-    TEMPERATURE_C_REFERENCE_LINES
-} from "../constants/safetyLevels";
+    SafetyLevel
+} from "../utils/SafetyLevel"
 import { SensorApi } from "../api/SensorApi";
 import { TICK_POINT_MIN_INTERVAL_MAP } from "../constants/tickPointMinIntervalMap";
 import { useEffect, useState } from "react";
+
+const { GENERAL_SAFETY_LEVELS } = SafetyLevel;
 
 export function useSensorChartData(
     startDate: Date,
@@ -79,7 +77,7 @@ export function useSensorChartData(
 
         setSensorChartData(Array.from(chartDataMap.values()));
         setXTicks(xTicksNew);
-        setGeneralSafetyLevel(getGeneralSafetyLevel(
+        setGeneralSafetyLevel(SafetyLevel.getGeneralSafetyLevel(
             temperatureReadings[temperatureReadings.length - 1].value,
             humidityReadings[humidityReadings.length - 1].value,
             gasReadings[gasReadings.length - 1].value
@@ -117,37 +115,37 @@ export function bucketMsToMin(ms: number, bucketMin: number, offsetMin: number) 
 
 }
 
-export function getGeneralSafetyLevel(
-    temperatureC: number | null,
-    humidity: number | null,
-    gas: number | null
-): GeneralSafetyLevelProps {
+// export function getGeneralSafetyLevel(
+//     temperatureC: number | null,
+//     humidity: number | null,
+//     gas: number | null
+// ): GeneralSafetyLevelProps {
 
-    const values = [temperatureC, humidity, gas];
-    const referenceLines = [
-        TEMPERATURE_C_REFERENCE_LINES, HUMIDITY_REFERENCE_LINES, GAS_REFERENCE_LINES
-    ].map((referenceLines, referenceLinesIndex) => {
-        if(values[referenceLinesIndex] === null) {
-            const { label, color } = GENERAL_SAFETY_LEVELS[0];
-            const referenceLine: SensorChartReferenceLineProps = { label, color, y: 0 };
-            return referenceLine;
-        }
-        let referenceLineIndex: number = referenceLines.findIndex(
-            ({y: treshold}) => (values[referenceLinesIndex]! < treshold)
-        );
-        if(referenceLineIndex < 0) return referenceLines[referenceLines.length - 1];
-        referenceLineIndex = Math.max(referenceLineIndex - 1, 0);
-        return referenceLines[referenceLineIndex];
-    });
-    let safetyLevelIndex = 0;
+//     const values = [temperatureC, humidity, gas];
+//     const referenceLines = [
+//         TEMPERATURE_C_REFERENCE_LINES, HUMIDITY_REFERENCE_LINES, GAS_REFERENCE_LINES
+//     ].map((referenceLines, referenceLinesIndex) => {
+//         if(values[referenceLinesIndex] === null) {
+//             const { label, color } = GENERAL_SAFETY_LEVELS[0];
+//             const referenceLine: SensorChartReferenceLineProps = { label, color, y: 0 };
+//             return referenceLine;
+//         }
+//         let referenceLineIndex: number = referenceLines.findIndex(
+//             ({y: treshold}) => (values[referenceLinesIndex]! < treshold)
+//         );
+//         if(referenceLineIndex < 0) return referenceLines[referenceLines.length - 1];
+//         referenceLineIndex = Math.max(referenceLineIndex - 1, 0);
+//         return referenceLines[referenceLineIndex];
+//     });
+//     let safetyLevelIndex = 0;
 
-    referenceLines.forEach(({color}) => {
-        const currentSafetyLevelIndex: number = GENERAL_SAFETY_LEVELS.findIndex(
-            ({range}) => range.includes(color)
-        );
-        if(currentSafetyLevelIndex > safetyLevelIndex) safetyLevelIndex = currentSafetyLevelIndex;
-    });
+//     referenceLines.forEach(({color}) => {
+//         const currentSafetyLevelIndex: number = GENERAL_SAFETY_LEVELS.findIndex(
+//             ({range}) => range.includes(color)
+//         );
+//         if(currentSafetyLevelIndex > safetyLevelIndex) safetyLevelIndex = currentSafetyLevelIndex;
+//     });
 
-    return GENERAL_SAFETY_LEVELS[safetyLevelIndex];
+//     return GENERAL_SAFETY_LEVELS[safetyLevelIndex];
 
-}
+// }

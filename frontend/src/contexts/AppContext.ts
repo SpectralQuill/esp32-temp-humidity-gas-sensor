@@ -2,8 +2,10 @@ import { AxisTick } from "recharts/types/util/types";
 import { createContext } from "react";
 import {
     GeneralSafetyLevelProps,
-    GENERAL_SAFETY_LEVELS
-} from "../constants/safetyLevels";
+    SafetyLevel
+} from "../utils/SafetyLevel";
+
+const { GENERAL_SAFETY_LEVELS } = SafetyLevel;
 
 export interface AppContextProps {
     generalSafetyLevel: GeneralSafetyLevelProps;
