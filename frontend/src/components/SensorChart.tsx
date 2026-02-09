@@ -11,20 +11,9 @@ import {
     YAxis
 } from "recharts";
 import { AxisDomain } from "recharts/types/util/types";
+import { format as formatDate } from "date-fns";
+import { SensorChartReferenceLineProps } from "../constants/safetyLevels";
 import { useContext } from "react";
-
-export interface SensorChartDataPoint {
-    time: string;
-    temperatureC: number | null;
-    humidity: number | null;
-    gas: number | null;
-}
-
-export interface SensorChartReferenceLineProps {
-    color: string,
-    label: string,
-    y: number
-}
 
 export interface SensorChartProps {
     color: string;
@@ -36,15 +25,13 @@ export interface SensorChartProps {
     formatReadingValue(value?: number): string;
 }
 
-export type SensorChartData = SensorChartDataPoint[];
-
 export function SensorChart(props: SensorChartProps) {
 
-    const {sensorChartData} = useContext(AppContext);
     const {
         color, dataKey, readingTypeLabel, referenceLines, unit, yAxisDomain,
         formatReadingValue
     } = props;
+    const {sensorChartData, sensorChartXTicks} = useContext(AppContext);
 
     return <>
         <ResponsiveContainer className="sensor-chart" width="100%" height={300}>
@@ -54,9 +41,12 @@ export function SensorChart(props: SensorChartProps) {
                     stroke="#f0f0f0"
                 />
                 <XAxis
-                    dataKey="time"
+                    dataKey="timestamp"
                     tick={{ fontSize: 12 }}
+                    ticks={sensorChartXTicks}
+                    type="number"
                     interval="preserveStartEnd"
+                    tickFormatter={(timestamp)=>formatDate(timestamp, "hh:mm a")}
                 />
                 <YAxis
                     label={{
@@ -72,7 +62,7 @@ export function SensorChart(props: SensorChartProps) {
                     key={y}
                     y={y}
                     stroke={color}
-                    strokeWidth={2}
+                    strokeWidth={1.5}
                     strokeDasharray="5 5"
                     label={{
                         value: label,
@@ -81,58 +71,11 @@ export function SensorChart(props: SensorChartProps) {
                         fontSize: 10,
                     }}
                 />)}
-                {/* Reference Lines for Temperature */}
-                {/* <ReferenceLine
-                    y={TEMPERATURE_LEVELS.EXTREME_COLD}
-                    stroke="#8b0000"
-                    strokeWidth={2}
-                    strokeDasharray="5 5"
-                    label={{
-                        value: "Extreme Cold",
-                        position: "insideBottomLeft",
-                        fill: "#8b0000",
-                        fontSize: 10,
-                    }}
-                />
-                <ReferenceLine
-                    y={TEMPERATURE_LEVELS.DANGER_COLD}
-                    stroke="#ff4444"
-                    strokeWidth={1.5}
-                    strokeDasharray="3 3"
-                />
-                <ReferenceLine
-                    y={TEMPERATURE_LEVELS.COMFORT_LOW}
-                    stroke="#4caf50"
-                    strokeWidth={1}
-                />
-                <ReferenceLine
-                    y={TEMPERATURE_LEVELS.COMFORT_HIGH}
-                    stroke="#4caf50"
-                    strokeWidth={1}
-                />
-                <ReferenceLine
-                    y={TEMPERATURE_LEVELS.DANGER_HOT}
-                    stroke="#ff4444"
-                    strokeWidth={1.5}
-                    strokeDasharray="3 3"
-                />
-                <ReferenceLine
-                    y={TEMPERATURE_LEVELS.EXTREME_HOT}
-                    stroke="#8b0000"
-                    strokeWidth={2}
-                    strokeDasharray="5 5"
-                    label={{
-                        value: "Extreme Heat",
-                        position: "insideTopLeft",
-                        fill: "#8b0000",
-                        fontSize: 10,
-                    }}
-                /> */}
                 <Tooltip
                     formatter={
                         (value?: number) => ([formatReadingValue(value) + unit, readingTypeLabel])
                     }
-                    labelFormatter={(label) => `Time: ${label}`}
+                    labelFormatter={(timestamp) => formatDate(timestamp as number, "hh:mm:ss a")}
                 />
                 <Legend />
                 <Area

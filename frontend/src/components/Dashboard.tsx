@@ -1,8 +1,9 @@
-import { SensorChart, SensorChartReferenceLineProps } from "./SensorChart";
-
-const TEMPERATURE_C_REFERENCE_LINES: SensorChartReferenceLineProps[] = [
-    {color: "#8b0000", label: "Extreme Cold", y: 5}
-];
+import {
+    GAS_REFERENCE_LINES,
+    HUMIDITY_REFERENCE_LINES,
+    TEMPERATURE_C_REFERENCE_LINES
+} from "../constants/safetyLevels";
+import { SensorChart } from "./SensorChart";
 
 export function Dashboard() {
 
@@ -22,10 +23,28 @@ export function Dashboard() {
                 referenceLines={TEMPERATURE_C_REFERENCE_LINES}
                 unit="°C"
                 yAxisDomain={[
-                    (dataMin: number) => Math.min(0, dataMin - 2),
-                    (dataMax: number) => Math.max(39, dataMax + 2),
+                    (dataMin: number) => Math.min(0, dataMin + 1),
+                    (dataMax: number) => Math.max(42, dataMax + 1),
                 ]}
                 formatReadingValue={formatTemperatureCValue}
+            />
+            <SensorChart
+                color="#0088ff"
+                dataKey="humidity"
+                readingTypeLabel="Humidity"
+                referenceLines={HUMIDITY_REFERENCE_LINES}
+                unit="%"
+                yAxisDomain={[0, 100]}
+                formatReadingValue={formatPercentageValue}
+            />
+            <SensorChart
+                color="#00cc88"
+                dataKey="gas"
+                readingTypeLabel="Gas"
+                referenceLines={GAS_REFERENCE_LINES}
+                unit="%"
+                yAxisDomain={[0, 100]}
+                formatReadingValue={formatPercentageValue}
             />
         </main>
     </>;

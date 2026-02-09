@@ -46,20 +46,6 @@ class SerialListener {
     private isConnected = false;
     private reconnectTimeout: NodeJS.Timeout | null = null;
 
-    // Track current values for each reading type
-    private currentValues: {
-        temperatureC: number | null;
-        humidity: number | null;
-        gas: number | null;
-    } = {
-        temperatureC: null,
-        humidity: null,
-        gas: null,
-    };
-
-    // Track if we've received initial values
-    private hasInitialValues = false;
-
     constructor() {
         this.initialize();
     }
@@ -107,8 +93,8 @@ class SerialListener {
                 this.reconnectTimeout = null;
             }
 
-            // Reset current values on new connection
-            this.resetCurrentValues();
+            // Check API health on connection
+            this.checkApiHealth();
         });
 
         this.port.on("error", (error: Error) => {
@@ -125,6 +111,21 @@ class SerialListener {
 
         if (this.parser) {
             this.parser.on("data", this.handleIncomingData.bind(this));
+        }
+    }
+
+    private async checkApiHealth(): Promise<void> {
+        try {
+            const response = await fetch(`${API_BASE_URL}/health`);
+            if (response.ok) {
+                const data = await response.json();
+                console.log(`✅ API is healthy (${data.status})`);
+            } else {
+                console.warn(`⚠️ API health check returned ${response.status}`);
+            }
+        } catch (error) {
+            console.error("❌ API health check failed:", error);
+            console.log("Make sure the API server is running at", API_BASE_URL);
         }
     }
 
@@ -175,76 +176,6 @@ class SerialListener {
         }, delay);
     }
 
-    private async resetCurrentValues(): Promise<void> {
-        try {
-            console.log("🔄 Fetching latest values from database...");
-
-            const apiUrl = `${API_BASE_URL}/api/readings/latest`;
-            const response = await fetch(apiUrl);
-
-            if (response.ok) {
-                const latestReadings = await response.json();
-
-                // Update current values with latest from database
-                if (latestReadings.temperatureC) {
-                    this.currentValues.temperatureC =
-                        latestReadings.temperatureC.value;
-                    console.log(
-                        `🌡️  Latest temperature from DB: ${latestReadings.temperatureC.value}°C`,
-                    );
-                } else {
-                    this.currentValues.temperatureC = null;
-                    console.log("🌡️  No temperature reading in database");
-                }
-
-                if (latestReadings.humidity) {
-                    this.currentValues.humidity = latestReadings.humidity.value;
-                    console.log(
-                        `💧 Latest humidity from DB: ${latestReadings.humidity.value}%`,
-                    );
-                } else {
-                    this.currentValues.humidity = null;
-                    console.log("💧 No humidity reading in database");
-                }
-
-                if (latestReadings.gas) {
-                    this.currentValues.gas = latestReadings.gas.value;
-                    console.log(
-                        `🔥 Latest gas from DB: ${latestReadings.gas.value}`,
-                    );
-                } else {
-                    this.currentValues.gas = null;
-                    console.log("🔥 No gas reading in database");
-                }
-
-                // Set initial values flag based on whether we got any data
-                this.hasInitialValues = Object.values(this.currentValues).some(
-                    (val) => val !== null,
-                );
-            } else {
-                console.warn(
-                    "⚠️  Could not fetch latest readings from API, starting with empty values",
-                );
-                this.setEmptyValues();
-            }
-        } catch (error) {
-            console.error("❌ Error fetching latest values:", error);
-            console.log(
-                "⚠️  Starting with empty values. Is the API server running?",
-            );
-            this.setEmptyValues();
-        }
-    }
-
-    private setEmptyValues(): void {
-        this.currentValues = {
-            temperatureC: null,
-            humidity: null,
-            gas: null,
-        };
-        this.hasInitialValues = false;
-    }
-
     private handleIncomingData(data: string): void {
         const rawData = data.trim();
         const timestamp = new Date();
@@ -281,7 +212,8 @@ class SerialListener {
                 sensorData.humidity !== undefined ||
                 sensorData.gas !== undefined
             ) {
-                // Process and send to API if values have changed
+                // Process and send all valid data to API
+                // The API will handle duplicate filtering
                 this.processEsp32Data(sensorData);
             } else {
                 console.log("⚠️  No valid sensor data found in:", rawData);
@@ -293,68 +225,43 @@ class SerialListener {
     }
 
     private processEsp32Data(sensorData: Esp32Data): void {
-        const hasChanges: boolean[] = [];
         const payload: any = {};
 
-        // Check each value for changes
+        // Validate and add temperature data if present
         if (sensorData.temperatureC !== undefined) {
-            if (sensorData.temperatureC <= 40) {
-                if (
-                    this.currentValues.temperatureC === null ||
-                    this.currentValues.temperatureC !==
-                        sensorData.temperatureC
-                ) {
-                    this.currentValues.temperatureC = sensorData.temperatureC;
-                    payload.temperatureC = sensorData.temperatureC;
-                    hasChanges.push(true);
-                }
+            // Basic validation for temperature
+            if (sensorData.temperatureC <= 45 && sensorData.temperatureC >= -15) {
+                payload.temperatureC = sensorData.temperatureC;
             }
         }
 
+        // Validate and add humidity data if present
         if (sensorData.humidity !== undefined) {
+            // Basic validation for humidity
             if (sensorData.humidity >= 0 && sensorData.humidity <= 100) {
-                if (
-                    this.currentValues.humidity === null ||
-                    this.currentValues.humidity !== sensorData.humidity
-                ) {
-                    this.currentValues.humidity = sensorData.humidity;
-                    payload.humidity = sensorData.humidity / 100;
-                    hasChanges.push(true);
-                }
+                payload.humidity = sensorData.humidity;
             }
         }
 
+        // Validate and add gas data if present
         if (sensorData.gas !== undefined) {
+            // Basic validation for gas
             if (sensorData.gas >= 0 && sensorData.gas <= 100) {
-                if (
-                    this.currentValues.gas === null ||
-                    this.currentValues.gas !== sensorData.gas
-                ) {
-                    this.currentValues.gas = sensorData.gas;
-                    payload.gas = sensorData.gas / 100;
-                    hasChanges.push(true);
-                }
+                payload.gas = sensorData.gas;
             }
         }
 
-        // Send to API if there are changes
-        if (hasChanges.length > 0) {
-            const isInitialData = !this.hasInitialValues;
-
-            this.sendToApi(payload, isInitialData);
+        // Send to API if there's any valid data
+        // API will handle duplicate filtering
+        if (Object.keys(payload).length > 0) {
+            this.sendToApi(payload);
+        } else {
+            console.log("⚠️  No valid sensor data to send");
         }
     }
 
-    private async sendToApi(
-        payload: any,
-        isInitialData: boolean = false,
-    ): Promise<void> {
+    private async sendToApi(payload: any): Promise<void> {
         const apiUrl = `${API_BASE_URL}/api/esp32/readings`;
-
-        if (Object.keys(payload).length === 0) {
-            console.log("⚠️  No valid data to send to API");
-            return;
-        }
 
         try {
             const response = await fetch(apiUrl, {
@@ -367,11 +274,6 @@ class SerialListener {
 
             if (response.ok) {
                 const result = await response.json();
-                const prefix = isInitialData ? "📥 Initial" : "📤 Updated";
-                console.log(`${prefix} data sent to API:`, {
-                    ...payload,
-                    response: result.message || "Success",
-                });
             } else {
                 console.error(
                     `❌ API error: ${response.status} ${response.statusText}`,

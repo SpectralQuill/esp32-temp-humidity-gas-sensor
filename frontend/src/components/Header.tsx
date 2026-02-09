@@ -15,14 +15,15 @@ export function Header() {
 }
 
 function LevelInformant() {
-    // const {
-    //     temperatureCCurrentValue, humidityCurrentValue, gasCurrentValue
-    // } = useContext(AppContext);
+    const {
+        generalSafetyLevel
+    } = useContext(AppContext);
 
     return (
         <>
             <div className="level-informant font-large">
-                <>Color: </>
+                <>-Color: </>
+                {generalSafetyLevel.color},{generalSafetyLevel.label}
             </div>
         </>
     );

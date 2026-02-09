@@ -28,3 +28,22 @@ interface BatchSensorReadingsResult {
     humidity?: SensorReading;
     gas?: SensorReading;
 }
+
+// Final for backend
+
+interface LatestSensorReadings {
+    temperatureC?: SensorReading;
+    humidity?: SensorReading;
+    gas?: SensorReading;
+}
+
+// Sensor Chart
+
+interface SensorChartDataPoint {
+    timestamp: number;
+    temperatureC: number | null;
+    humidity: number | null;
+    gas: number | null;
+}
+
+type SensorChartData = SensorChartDataPoint[];

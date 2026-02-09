@@ -1,6 +1,5 @@
 // Configuration constants
-const unsigned long LOOP_INTERVAL = 125; // milliseconds
-// const unsigned long LOG_INTERVAL = 1000;
+const unsigned long LOOP_INTERVAL = 250; // milliseconds
 const unsigned long BAUD_RATE = 115200;
 
 // Sensor pins based on CSV data
@@ -23,7 +22,7 @@ const int LCD_BIT_2 = 8; // D8
 #include <LiquidCrystal.h>
 
 // ============================================
-// SensorsReader Class
+// SensorsReader Class - FIXED VERSION
 // ============================================
 class SensorsReader {
   private:
@@ -31,51 +30,88 @@ class SensorsReader {
     float currentHumidity;
     float currentGas;
     
+    // FIXED: Better rounding to half with epsilon for floating point comparison
     float roundToHalf(float value) {
-      // Round to 0, 0.5, or 1
-      float decimal = value - int(value);
-      if (decimal < 0.25) return float(int(value));
-      else if (decimal < 0.75) return float(int(value)) + 0.5;
-      else return float(int(value)) + 1.0;
+      // Handle negative values properly
+      if (value < 0) return 0.0;
+      
+      // Round to nearest 0.5 with proper handling
+      float rounded = round(value * 2.0) / 2.0;
+      return rounded;
     }
     
+    // FIXED: Proper rounding to integer
     float roundToInteger(float value) {
-      // Round to 0 or 1 (basically just cast to int)
-      float decimal = value - int(value);
-      if (decimal < 0.5) return float(int(value));
-      return float(int(value)) + 1.0;
+      if (value < 0) return 0.0;
+      return round(value);
     }
     
-    float convertAnalogToTempC(float analogValue) {
+    // FIXED: Added validation and bounds checking
+    float convertAnalogToTempC(int analogValue) {
+      if (analogValue < 0) return 0.0;
+      
       // y = 0.321364x - 0.100672
       float temp = (0.321364 * analogValue) - 0.100672;
+      
+      // Validate temperature range (adjust based on your sensor)
+      if (temp < -10.0 || temp > 50.0) {
+        return currentTempC; // Return last valid reading
+      }
+      
       return roundToHalf(temp);
     }
     
-    float convertAnalogToPercentage(float analogValue) {
+    // FIXED: Ensure percentage is within 0-100
+    float convertAnalogToPercentage(int analogValue) {
+      if (analogValue < 0) return 0.0;
+      
       // y = 0.097655x + 0.001815
       float percentage = (0.097655 * analogValue) + 0.001815;
-      return roundToInteger(percentage);
+      percentage = roundToInteger(percentage);
+      
+      // Clamp to 0-100
+      if (percentage < 0.0) return 0.0;
+      if (percentage > 100.0) return 100.0;
+      return percentage;
     }
     
-    float getModeValue(const int readings[], int size) {
-      // Calculate mode (most frequent value)
+    // FIXED: Get median instead of mode for better noise rejection
+    float getMedianValue(const int readings[], int size) {
       if (size == 0) return 0.0;
       
-      int maxCount = 0;
-      float mode = readings[0];
-      
+      // Copy array and sort
+      int sorted[size];
       for (int i = 0; i < size; i++) {
-        int count = 0;
-        for (int j = 0; j < size; j++) {
-          if (readings[j] == readings[i]) count++;
-        }
-        if (count > maxCount) {
-          maxCount = count;
-          mode = readings[i];
+        sorted[i] = readings[i];
+      }
+      
+      // Simple bubble sort
+      for (int i = 0; i < size - 1; i++) {
+        for (int j = 0; j < size - i - 1; j++) {
+          if (sorted[j] > sorted[j + 1]) {
+            int temp = sorted[j];
+            sorted[j] = sorted[j + 1];
+            sorted[j + 1] = temp;
+          }
         }
       }
-      return mode;
+      
+      // Return median
+      if (size % 2 == 0) {
+        return (sorted[size/2 - 1] + sorted[size/2]) / 2.0;
+      } else {
+        return sorted[size/2];
+      }
+    }
+    
+    // FIXED: Debounce analog readings
+    int readAnalogDebounced(int pin, int samples = 5) {
+      long total = 0;
+      for (int i = 0; i < samples; i++) {
+        total += analogRead(pin);
+        delay(1); // Small delay between readings
+      }
+      return total / samples;
     }
     
   public:
@@ -93,22 +129,22 @@ class SensorsReader {
     }
     
     float readTempC() {
-      // Read all temperature pins and get mode value
+      // Read all temperature pins with debouncing
       int tempReadings[sizeof(TEMP_PINS)/sizeof(TEMP_PINS[0])];
       for (int i = 0; i < sizeof(TEMP_PINS)/sizeof(TEMP_PINS[0]); i++) {
-        tempReadings[i] = analogRead(TEMP_PINS[i]);
+        tempReadings[i] = readAnalogDebounced(TEMP_PINS[i]);
       }
-      float modeValue = getModeValue(tempReadings, sizeof(TEMP_PINS)/sizeof(TEMP_PINS[0]));
-      return convertAnalogToTempC(modeValue);
+      float medianValue = getMedianValue(tempReadings, sizeof(TEMP_PINS)/sizeof(TEMP_PINS[0]));
+      return convertAnalogToTempC(medianValue);
     }
     
     float readHumidity() {
-      int analogValue = analogRead(HUMIDITY_PIN);
+      int analogValue = readAnalogDebounced(HUMIDITY_PIN);
       return convertAnalogToPercentage(analogValue);
     }
     
     float readGas() {
-      int analogValue = analogRead(GAS_PIN);
+      int analogValue = readAnalogDebounced(GAS_PIN);
       return convertAnalogToPercentage(analogValue);
     }
     
@@ -118,14 +154,25 @@ class SensorsReader {
       currentGas = readGas();
     }
     
+    // FIXED: Improved JSON output with error checking
     void printReadings() {
       Serial.print("{\"temperatureC\":");
-      Serial.print(currentTempC);
+      
+      // FIX: Ensure proper decimal formatting
+      char tempStr[10];
+      dtostrf(currentTempC, 4, 1, tempStr); // 4 chars total, 1 decimal
+      Serial.print(tempStr);
+      
       Serial.print(",\"humidity\":");
-      Serial.print(currentHumidity);
+      Serial.print(int(currentHumidity)); // Humidity as integer
+      
       Serial.print(",\"gas\":");
-      Serial.print(currentGas);
+      Serial.print(int(currentGas)); // Gas as integer
+      
       Serial.println("}");
+      
+      // FIXED: Flush serial to ensure complete transmission
+      Serial.flush();
     }
     
     float getCurrentTempC() { return currentTempC; }
@@ -134,14 +181,18 @@ class SensorsReader {
 };
 
 // ============================================
-// LcdController Class
+// LcdController Class (unchanged, but you can add debouncing)
 // ============================================
 class LcdController {
   private:
-    int mode; // 0=Welcome, 1=Temp, 2=Humidity, 3=Gas
+    int mode;
     LiquidCrystal lcd;
     SensorsReader* sensorsReader;
     float currentValue;
+    
+    // FIXED: Add debouncing for buttons
+    unsigned long lastButtonTime = 0;
+    const unsigned long DEBOUNCE_DELAY = 50;
     
     void displayWelcome() {
       lcd.clear();
@@ -156,11 +207,9 @@ class LcdController {
       mode = 0;
       currentValue = -1.0;
       
-      // Initialize button pins
       pinMode(LCD_BIT_1, INPUT_PULLUP);
       pinMode(LCD_BIT_2, INPUT_PULLUP);
       
-      // Initialize LCD
       lcd.begin(16, 2);
       displayWelcome();
     }
@@ -169,78 +218,70 @@ class LcdController {
       if (newMode < 1 || newMode > 3) return;
       
       mode = newMode;
-      currentValue = -1.0; // Reset to force display update
+      currentValue = -1.0;
       
       lcd.clear();
       switch(mode) {
-        case 1: // Temperature
+        case 1:
           lcd.print("Temperature (C):");
           break;
-        case 2: // Humidity
+        case 2:
           lcd.print("Humidity:");
           break;
-        case 3: // Gas
+        case 3:
           lcd.print("Gas:");
           break;
       }
-      
-      // Force immediate display update
       scanReadingUpdates();
     }
     
     void scanModeUpdates() {
-      // Read 2-bit button encoding
-      // LOW = 0, HIGH = 1 (due to INPUT_PULLUP)
+      unsigned long currentTime = millis();
+      if (currentTime - lastButtonTime < DEBOUNCE_DELAY) return;
+      
       int bit1 = digitalRead(LCD_BIT_1) == LOW ? 0 : 1;
       int bit2 = digitalRead(LCD_BIT_2) == LOW ? 0 : 1;
-      
-      // Combine bits: bit2 is MSB, bit1 is LSB
       int buttonCode = (bit2 << 1) | bit1;
-      int newMode = buttonCode + 1; // Convert 0-3 to 1-4
+      int newMode = buttonCode + 1;
       
-      // If newMode is 4, it means no button or invalid combination
-      // Only change mode if valid (1-3) and different from current
       if (newMode >= 1 && newMode <= 3 && newMode != mode) {
         changeMode(newMode);
+        lastButtonTime = currentTime;
       }
     }
     
     void scanReadingUpdates() {
-      if (mode == 0) return; // Welcome screen, no sensor updates
+      if (mode == 0) return;
       
       float newValue = -1.0;
-      
-      // Get appropriate sensor reading
       switch(mode) {
-        case 1: // Temperature
+        case 1:
           newValue = sensorsReader->getCurrentTempC();
           break;
-        case 2: // Humidity
+        case 2:
           newValue = sensorsReader->getCurrentHumidity();
           break;
-        case 3: // Gas
+        case 3:
           newValue = sensorsReader->getCurrentGas();
           break;
       }
       
-      // Update display if value changed
       if (newValue != currentValue) {
         currentValue = newValue;
-        
         lcd.setCursor(0, 1);
-        lcd.print("                "); // Clear line
+        lcd.print("                ");
         lcd.setCursor(0, 1);
         
         switch(mode) {
-          case 1: // Temperature with 1 decimal
+          case 1:
             lcd.print(currentValue, 1);
             lcd.print(" C");
             break;
-          case 2: // Humidity as integer
+          case 2:
             lcd.print(int(currentValue));
             lcd.print("%");
             break;
-          case 3: // Gas as integer
+          case 3:
             lcd.print(int(currentValue));
             lcd.print("%");
             break;
@@ -249,19 +290,17 @@ class LcdController {
     }
 };
 
-// ============================================
 // Global Objects
-// ============================================
 SensorsReader sensors;
 LcdController* lcdController;
-// unsigned long loopTracker = 0;
 
-// ============================================
 // Setup & Loop
-// ============================================
 void setup() {
   Serial.begin(BAUD_RATE);
-  delay(1000); // Wait for serial to initialize
+  while (!Serial) {
+    ; // Wait for serial port to connect
+  }
+  delay(2000); // Increased delay for stable serial
   
   sensors = SensorsReader();
   lcdController = new LcdController(&sensors);
@@ -273,9 +312,4 @@ void loop() {
   lcdController->scanReadingUpdates();
   lcdController->scanModeUpdates();
   delay(LOOP_INTERVAL);
-  // loopTracker += LOOP_INTERVAL;
-  // if(loopTracker >= LOG_INTERVAL) {
-  //   loopTracker = 0;
-
-  // }
 }
