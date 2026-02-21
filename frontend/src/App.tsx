@@ -44,12 +44,11 @@ function App() {
         <AppContext.Provider value={appContext}>
             <>{/* Content */}
                 <Header />
-                <p>{isConnectedToDatabase ? "Connected" : "Waiting for connection"}</p>
                 <Dashboard />
             </>
             <>{/* Popups */}
                 <StartupPopup />
-                <DangerPopup visible={false} />
+                <DangerPopup visible={undefined} />
             </>
             <>{/* Variable loggers */}
                 <VariableLogger variable={[startDate, endDate]} visible={false}>

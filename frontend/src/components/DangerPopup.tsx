@@ -1,7 +1,11 @@
 import { AppContext } from "../contexts/AppContext";
 import { ArrayUtils } from "../utils/ArrayUtils";
+import { faTriangleExclamation } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Popup } from "./Popup";
 import { useContext, useEffect, useState } from "react";
+
+import "../style/DangerPopup.scss";
 
 interface DangerPopupProps {
     className?: string;
@@ -34,7 +38,10 @@ export function DangerPopup(props: DangerPopupProps) {
     if (!isConnectedToDatabase || !isVisible) return <></>;
     return <>
         <Popup className={dangerPopupClassName} visible={isVisible}>
-            Danger!
+            <div className="danger-icon-wrapper">
+                <FontAwesomeIcon className="danger-icon" icon={faTriangleExclamation}/>
+            </div>
+            <p>Danger</p>
         </Popup>
     </>;
 

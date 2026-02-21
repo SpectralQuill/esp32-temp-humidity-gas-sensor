@@ -36,7 +36,6 @@ export function SensorTooltip({
     if (!timestamp || !readingTypeLabel || !sensorReadingType || value === undefined)
         return <></>;
 
-    console.log(payload)
     const referenceLines = REFERENCE_LINES_MAP[sensorReadingType];
     const {
         color: referenceLineColor,

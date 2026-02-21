@@ -1,7 +1,7 @@
 import { AppContext } from "../contexts/AppContext";
 import { useContext } from "react";
 
-import "../style/SensorCard.scss";
+import "../style/SensorChart.scss";
 
 export interface SensorChartProps {
     color: string;
@@ -24,8 +24,9 @@ export function SensorCard(props: SensorChartProps) {
 
     return <>
         <div className="sensor-card">
-            <h4>{readingTypeLabel}</h4>
-            <h3>{formatReadingValue(value)}{unit}</h3>
+            <h4 className="font-large">
+                {readingTypeLabel}: {formatReadingValue(value)}{unit}
+            </h4>
         </div>
     </>;
 

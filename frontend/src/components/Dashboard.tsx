@@ -1,6 +1,8 @@
 import { SafetyLevel } from "../utils/SafetyLevel";
 import { SensorChart } from "./SensorChart";
 
+import "../style/Dashboard.scss";
+
 const {
     TEMPERATURE_C_REFERENCE_LINES,
     HUMIDITY_REFERENCE_LINES,

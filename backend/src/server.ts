@@ -1,12 +1,33 @@
-import express from "express";
+import { ApiConfig } from "../utils/ApiConfig";
 import cors from "cors";
-import { sensorDB } from "./database";
 import dotenv from "dotenv";
+import express from "express";
+import path from "path";
+import { sensorDB } from "./database";
 
-dotenv.config();
+dotenv.config({ path: path.resolve(process.cwd(), "../.env") });
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+let apiConfig: ApiConfig;
+
+try {
+
+    apiConfig = new ApiConfig(
+        process.env.API_HOST,
+        process.env.API_PORT,
+    );
+
+} catch (error) {
+
+    console.error(
+        "Invalid API configuration. Please check your .env file for API_HOST and API_PORT.",
+    );
+    process.exit(1);
+
+}
+
+const HOST = apiConfig.getHost();
+const PORT = apiConfig.getPort();
 
 // Middleware
 app.use(cors());
@@ -15,7 +36,7 @@ app.use(express.json());
 // Initialize database
 await sensorDB.initialize();
 
-// ===== EXACT API METHODS AS REQUESTED =====
+// ===== API METHODS =====
 
 // Health check
 app.get("/health", (req, res) => {
@@ -280,13 +301,13 @@ app.post("/api/esp32/readings", async (req, res) => {
 });
 
 // Start server
-app.listen(PORT, () => {
+app.listen(PORT, HOST, () => {
     console.log(`
 🚀 ESP32 Sensor API Server
 ===========================
 📍 Port: ${PORT}
 💾 Database: SQLite (database/sensor.db)
-🔗 Health check: http://localhost:${PORT}/health
+🔗 Health check: http://${HOST}:${PORT}/health
 
 📝 YOUR EXACT API METHODS:
   POST   /api/reading          - createReading(createdAt, readingType, value)

@@ -17,6 +17,7 @@ export function useConnection(
 
     function simulateConnection() {
 
+        if (checkSimulationsCount === Infinity) return;
         const timeoutMs = checkIntervalMs * (checkSimulationsCount ?? 1);
         const timeoutId = setTimeout(() => setIsConnected(true), timeoutMs);
         return () => clearTimeout(timeoutId);

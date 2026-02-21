@@ -4,8 +4,6 @@ import { Fragment } from "react";
 import { TICK_POINT_MIN_INTERVAL_MAP } from "../constants/tickPointMinIntervalMap";
 import { useContext } from "react";
 
-import "../style/MinuteRangeSelection.scss";
-
 export function MinuteRangeSelection() {
 
     const { graphRangeMin, setGraphRangeMin } = useContext(AppContext);
@@ -16,13 +14,20 @@ export function MinuteRangeSelection() {
     };
 
     return <>
-        <select id="graph-range" value={graphRangeMin} onChange={handleChange}>
-            {Object.entries(TICK_POINT_MIN_INTERVAL_MAP).map(
-                ([value, [_1, _2, label]]) => <Fragment key={value}>
-                    <option value={+value}>{ label }</option>
-                </Fragment>
-            )}
-        </select>
+        <div className="graph-range-wrapper">
+            <select
+                id="graph-range"
+                className="font-medium"
+                value={graphRangeMin}
+                onChange={handleChange}
+            >
+                {Object.entries(TICK_POINT_MIN_INTERVAL_MAP).map(
+                    ([value, [_1, _2, label]]) => <Fragment key={value}>
+                        <option value={+value}>{ label }</option>
+                    </Fragment>
+                )}
+            </select>
+        </div>
     </>;
 
 }

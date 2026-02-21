@@ -25,8 +25,8 @@ const SERIAL_PARITY = (process.env.SERIAL_PARITY || "none") as
     | "odd"
     | "mark"
     | "space";
-const SERIAL_STOP_BITS = (
-    process.env.SERIAL_STOP_BITS ? parseInt(process.env.SERIAL_STOP_BITS) : 1
+const SERIAL_SERIAL_STOP_BITS = (
+    process.env.SERIAL_SERIAL_STOP_BITS ? parseInt(process.env.SERIAL_SERIAL_STOP_BITS) : 1
 ) as 1 | 1.5 | 2;
 
 console.log(`
@@ -61,7 +61,7 @@ class SerialListener {
                 baudRate: SERIAL_BAUD_RATE,
                 dataBits: SERIAL_DATA_BITS,
                 parity: SERIAL_PARITY,
-                stopBits: SERIAL_STOP_BITS,
+                stopBits: SERIAL_SERIAL_STOP_BITS,
                 autoOpen: true,
             });
 
@@ -230,7 +230,7 @@ class SerialListener {
         // Validate and add temperature data if present
         if (sensorData.temperatureC !== undefined) {
             // Basic validation for temperature
-            if (sensorData.temperatureC <= 45 && sensorData.temperatureC >= -15) {
+            if (sensorData.temperatureC <= 100 && sensorData.temperatureC >= 0) {
                 payload.temperatureC = sensorData.temperatureC;
             }
         }

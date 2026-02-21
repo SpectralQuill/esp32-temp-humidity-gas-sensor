@@ -1,6 +1,23 @@
 @use "variables" as *;
 @forward "./global.scss";
 
-// .startup-popup {
+.startup-popup {
+    .popup-header {
+        display: none;
+    }
 
-// }
+    .popup-body {
+        padding: 5em;
+    }
+
+    h2 {
+        margin: 1em 0;
+
+        text-align: center;
+    }
+
+    .progress {
+        text-align: center;
+    }
+
+}

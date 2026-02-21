@@ -7,10 +7,6 @@ body {
     background: $primary-color;
 }
 
-#root {
-    width: 100vw;
-}
-
 // General
 
 .hidden {
@@ -51,9 +47,9 @@ h6 {
     margin: 0;
 }
 
-// Buttons
+// Buttons and selects
 
-button {
+button, select {
     outline: 0;
     border: none;
     background: none;
@@ -71,4 +67,10 @@ ul {
 .no-list-style {
     list-style: none;
     padding: 0;
+}
+
+// Paragraphs
+
+p {
+    margin: 0;
 }

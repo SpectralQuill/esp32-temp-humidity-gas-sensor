@@ -1,0 +1,38 @@
+@use "variables" as *;
+@forward "./global.scss";
+
+.danger-popup {
+    .popup-content {
+        display: grid;
+        grid-template-rows: max-content 1fr;
+        gap: 0;
+    }
+
+    .popup-body {
+        display: grid;
+        grid-template-rows: 1fr max-content max-content 3fr;
+
+        * {
+            color: #8b0000!important;
+        }
+
+        > * {
+            flex: 1;
+            text-align: center;
+        }
+    }
+
+    .danger-icon-wrapper {
+        grid-row: 2;
+    }
+
+    .danger-icon {
+        font-size: 150px;
+    }
+
+    p {
+        grid-row: 3;
+        font-size: 50px;
+    }
+
+}

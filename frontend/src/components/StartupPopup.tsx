@@ -31,7 +31,7 @@ export function StartupPopup() {
             isUnclosable={true}
         >
             <h2>Welcome to the ESP32 Sensor Dashboard!</h2>
-            <ul className="no-list-style font-medium">
+            <ul className="progress no-list-style font-medium">
                 <li>
                     <FontAwesomeIcon icon={
                         isConnectedToDatabase ? faSolidCircleCheck : faRegularCircleCheck
