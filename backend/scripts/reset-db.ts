@@ -1,7 +1,7 @@
-import {resetDatabase} from '../src/reset';
+import { resetDatabase } from "../src/reset";
 
 async function main() {
-  await resetDatabase();
+    await resetDatabase();
 }
 
 main();

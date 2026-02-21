@@ -19,8 +19,8 @@ const port = new SerialPort({
         ? parseInt(process.env.SERIAL_DATA_BITS)
         : undefined,
     parity: process.env.SERIAL_PARITY || "none",
-    stopBits: process.env.SERIAL_STOP_BITS
-        ? parseInt(process.env.SERIAL_STOP_BITS)
+    stopBits: process.env.SERIAL_SERIAL_STOP_BITS
+        ? parseInt(process.env.SERIAL_SERIAL_STOP_BITS)
         : undefined,
     autoOpen: true,
 });

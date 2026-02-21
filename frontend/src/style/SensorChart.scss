@@ -1,0 +1,15 @@
+@use "variables" as *;
+@forward "./global.scss";
+
+.sensor-chart-wrapper {
+    
+    .sensor-card {
+        text-align: center;
+    }
+
+    .sensor-tooltip {
+        background: white;
+        padding: 10px;
+        border: 1px solid #ccc;
+    }
+}
