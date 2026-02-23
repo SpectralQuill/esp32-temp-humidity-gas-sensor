@@ -7,11 +7,11 @@ export class SensorApi {
 
     private static convertReadingsResult(
         result: PromiseSettledResult<AxiosResponse<any, any, {}>>
-    ): SensorReading[] {
+    ): SensorReadingOld[] {
 
         if (result.status !== 'fulfilled' || result.value.data.length === 0) return [];
         return result.value.data.map(
-            ({createdAt, readingType, value}: SensorReading) => ({
+            ({createdAt, readingType, value}: SensorReadingOld) => ({
                 createdAt: new Date(createdAt),
                 readingType, value
             })
@@ -20,9 +20,9 @@ export class SensorApi {
     }
 
     // private static mergeSensorData(
-    //     temperatures: SensorReading[],
-    //     humidities: SensorReading[],
-    //     gases: SensorReading[],
+    //     temperatures: SensorReadingOld[],
+    //     humidities: SensorReadingOld[],
+    //     gases: SensorReadingOld[],
     //     startDate: Date,
     //     endDate: Date,
     //     minuteInterval: number = 1
@@ -150,11 +150,11 @@ export class SensorApi {
     /**
      * Get latest readings for all sensor types
      */
-    public static async getLatestReadings(): Promise<LatestSensorReadings> {
+    public static async getLatestReadings(): Promise<LatestSensorReadingOlds> {
 
         const response = await axios.get(`${API_BASE_URL}/api/readings/latest`);
         const data = response.data;
-        const result: LatestSensorReadings = {};
+        const result: LatestSensorReadingOlds = {};
         
         if (data.temperatureC) {
             result.temperatureC = {
@@ -284,7 +284,7 @@ export class SensorApi {
     }
 
     public static async getReadings(startDate: Date, endDate: Date): Promise<[
-        SensorReading[], SensorReading[], SensorReading[]
+        SensorReadingOld[], SensorReadingOld[], SensorReadingOld[]
     ]> {
 
         const [temperaturesCResult, humiditiesResult, gasesResult] = await Promise.allSettled([
@@ -307,9 +307,9 @@ export class SensorApi {
                 },
             }),
         ]);
-        let temperatures: SensorReading[] = SensorApi.convertReadingsResult(temperaturesCResult);
-        let humidities: SensorReading[] = SensorApi.convertReadingsResult(humiditiesResult);
-        let gases: SensorReading[] = SensorApi.convertReadingsResult(gasesResult);
+        let temperatures: SensorReadingOld[] = SensorApi.convertReadingsResult(temperaturesCResult);
+        let humidities: SensorReadingOld[] = SensorApi.convertReadingsResult(humiditiesResult);
+        let gases: SensorReadingOld[] = SensorApi.convertReadingsResult(gasesResult);
         const hasEmptyResult = (
             temperatures.length === 0 || humidities.length === 0 || gases.length === 0
         );

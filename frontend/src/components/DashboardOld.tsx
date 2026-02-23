@@ -15,16 +15,16 @@ import "../style/Dashboard.scss";
 
 const API_BASE_URL = "http://localhost:3000";
 
-interface SensorReading {
+interface SensorReadingOld {
     createdAt: string;
     readingType: string;
     value: number;
 }
 
 interface LatestReadings {
-    temperatureC?: SensorReading;
-    humidity?: SensorReading;
-    gas?: SensorReading;
+    temperatureC?: SensorReadingOld;
+    humidity?: SensorReadingOld;
+    gas?: SensorReadingOld;
 }
 
 interface ChartDataPoint {
@@ -121,7 +121,7 @@ const Dashboard: React.FC = () => {
 
             // Process and multiply humidity and gas values by 100
             const processReadings = (
-                readings: DBSensorReading[],
+                readings: DBSensorReadingOld[],
                 multiplyBy100: boolean,
             ) => {
                 return readings.map((reading) => ({
@@ -171,11 +171,11 @@ const Dashboard: React.FC = () => {
     };
 
     const addBoundaryPoints = (
-        readings: DBSensorReading[],
+        readings: DBSensorReadingOld[],
         readingType: SensorReadingType,
         startDate: Date,
         endDate: Date,
-    ): DBSensorReading[] => {
+    ): DBSensorReadingOld[] => {
         if (readings.length === 0) return readings;
 
         // Sort readings by time (oldest first)
@@ -190,13 +190,13 @@ const Dashboard: React.FC = () => {
         const latestValue = sortedReadings[sortedReadings.length - 1].value;
 
         // Create boundary points
-        const startPoint: DBSensorReading = {
+        const startPoint: DBSensorReadingOld = {
             createdAt: startDate.toISOString(),
             readingType: readingType,
             value: earliestValue,
         };
 
-        const endPoint: DBSensorReading = {
+        const endPoint: DBSensorReadingOld = {
             createdAt: endDate.toISOString(),
             readingType: readingType,
             value: latestValue,
@@ -207,9 +207,9 @@ const Dashboard: React.FC = () => {
     };
 
     const mergeSensorData = (
-        temperatureCData: SensorReading[],
-        humidityData: SensorReading[],
-        gasData: SensorReading[],
+        temperatureCData: SensorReadingOld[],
+        humidityData: SensorReadingOld[],
+        gasData: SensorReadingOld[],
     ): ChartDataPoint[] => {
         const allReadings: Array<{
             timestamp: Date;

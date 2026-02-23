@@ -1,339 +1,221 @@
 import { ApiConfig } from "../utils/ApiConfig";
 import cors from "cors";
 import dotenv from "dotenv";
+import { Esp32SqliteService } from "./sqliteService";
 import express from "express";
-import path from "path";
-import { sensorDB } from "./database";
+import { IpUtils } from "../utils/IpUtils";
 
-dotenv.config({ path: path.resolve(process.cwd(), "../.env") });
+dotenv.config();
 
 const app = express();
+const sqliteService = new Esp32SqliteService();
+await sqliteService.initialize();
+
 let apiConfig: ApiConfig;
 
 try {
 
     apiConfig = new ApiConfig(
         process.env.API_HOST,
-        process.env.API_PORT,
+        process.env.API_PORT
     );
 
 } catch (error) {
 
     console.error(
-        "Invalid API configuration. Please check your .env file for API_HOST and API_PORT.",
+        "Invalid API configuration. Please check API_HOST and API_PORT in .env."
     );
     process.exit(1);
 
 }
 
-const HOST = apiConfig.getHost();
-const PORT = apiConfig.getPort();
+const API_HOST = apiConfig.getHost();
+const API_PORT = apiConfig.getPort();
 
 // Middleware
 app.use(cors());
 app.use(express.json());
 
-// Initialize database
-await sensorDB.initialize();
+/* =======================
+HEALTH CHECK
+======================= */
+app.get("/health", async (_req, res) => {
 
-// ===== API METHODS =====
+    const health = await sqliteService.getHealth();
+    const isHealthy = (health.status === "healthy" && health.databaseStatus === "reachable");
+    const statusCode = isHealthy ? 200 : 503;
+    res.status(statusCode).json(health);
 
-// Health check
-app.get("/health", (req, res) => {
-    res.json({
-        status: "healthy",
-        service: "ESP32 Sensor API",
-        timestamp: new Date().toISOString(),
-        database: "SQLite",
-        uptime: process.uptime(),
-    });
 });
 
-// API Method 1: Create a single reading
+/* =======================
+CREATE SINGLE ROW
+======================= */
 app.post("/api/reading", async (req, res) => {
+
     try {
-        const { createdAt, readingType, value } = req.body;
-
-        // Validate input
-        if (!createdAt || !readingType || value === undefined) {
+        const { createdAt, temperatureC, humidity, gas } = req.body;
+        
+        if (
+            temperatureC === undefined ||
+            humidity === undefined ||
+            gas === undefined
+        ) {
             return res.status(400).json({
-                error: "Missing required fields: createdAt, readingType, value",
+                error: "temperatureC, humidity, and gas are required"
             });
         }
-
-        if (!["temperatureC", "humidity", "gas"].includes(readingType)) {
-            return res.status(400).json({
-                error: "Invalid readingType. Must be temperatureC, humidity, or gas",
-            });
-        }
-
-        if (typeof value !== "number" || isNaN(value)) {
-            return res.status(400).json({ error: "Value must be a number" });
-        }
-
-        const date = new Date(createdAt);
-        if (isNaN(date.getTime())) {
+        
+        const date = createdAt ? new Date(createdAt) : null;
+        if (createdAt && isNaN(date!.getTime())) {
             return res.status(400).json({ error: "Invalid createdAt date" });
         }
-
-        const reading = await sensorDB.createReading(date, readingType, value);
+        
+        const reading = await sqliteService.createReading(
+            date,
+            Number(temperatureC),
+            Number(humidity),
+            Number(gas)
+        );
+        
         res.status(201).json(reading);
+
     } catch (error) {
+
         console.error("Error creating reading:", error);
         res.status(500).json({ error: "Failed to create reading" });
+
     }
+
 });
 
-// API Method 2: Create multiple readings
-app.post("/api/readings", async (req, res) => {
-    try {
-        const { temperatureC, humidity, gas } = req.body;
-
-        // At least one reading must be provided
-        if (!temperatureC && !humidity && !gas) {
-            return res.status(400).json({
-                error: "At least one reading (temperatureC, humidity, or gas) must be provided",
-            });
-        }
-
-        const result = await sensorDB.createReadings(
-            temperatureC,
-            humidity,
-            gas,
-        );
-        res.status(201).json(result);
-    } catch (error) {
-        console.error("Error creating readings:", error);
-        res.status(500).json({ error: "Failed to create readings" });
-    }
-});
-
-// API Method 3: Get all readings within date range
+/* =======================
+GET READINGS BY DATE RANGE
+======================= */
 app.get("/api/readings", async (req, res) => {
+
     try {
-        const { startDate, endDate } = req.query;
 
-        if (!startDate || !endDate) {
-            return res
-                .status(400)
-                .json({ error: "Both startDate and endDate are required" });
-        }
-
-        const start = new Date(startDate as string);
-        const end = new Date(endDate as string);
-
-        if (isNaN(start.getTime()) || isNaN(end.getTime())) {
-            return res.status(400).json({ error: "Invalid date format" });
-        }
-
-        const readings = await sensorDB.getReadings(start, end);
+        const { startDate, endDate, excludeStart, excludeEnd } = req.query;
+        
+        const start = startDate ? new Date(startDate as string) : null;
+        const end = endDate ? new Date(endDate as string) : null;
+        
+        if (startDate && isNaN(start!.getTime()))
+            return res.status(400).json({ error: "Invalid startDate" });
+        
+        if (endDate && isNaN(end!.getTime()))
+            return res.status(400).json({ error: "Invalid endDate" });
+        
+        const readings = await sqliteService.getReadings(
+            start,
+            end,
+            excludeStart === "true",
+            excludeEnd === "true"
+        );
+        
         res.json(readings);
+
     } catch (error) {
+
         console.error("Error getting readings:", error);
         res.status(500).json({ error: "Failed to get readings" });
+
     }
+
 });
 
-// API Method 4: Get temperature readings
-app.get("/api/readings/temperature", async (req, res) => {
-    try {
-        const { startDate, endDate } = req.query;
-
-        if (!startDate || !endDate) {
-            return res
-                .status(400)
-                .json({ error: "Both startDate and endDate are required" });
-        }
-
-        const start = new Date(startDate as string);
-        const end = new Date(endDate as string);
-
-        if (isNaN(start.getTime()) || isNaN(end.getTime())) {
-            return res.status(400).json({ error: "Invalid date format" });
-        }
-
-        const readings = await sensorDB.getTemperaturesC(start, end);
-        res.json(readings);
-    } catch (error) {
-        console.error("Error getting temperature readings:", error);
-        res.status(500).json({ error: "Failed to get temperature readings" });
-    }
-});
-
-// API Method 5: Get humidity readings
-app.get("/api/readings/humidity", async (req, res) => {
-    try {
-        const { startDate, endDate } = req.query;
-
-        if (!startDate || !endDate) {
-            return res
-                .status(400)
-                .json({ error: "Both startDate and endDate are required" });
-        }
-
-        const start = new Date(startDate as string);
-        const end = new Date(endDate as string);
-
-        if (isNaN(start.getTime()) || isNaN(end.getTime())) {
-            return res.status(400).json({ error: "Invalid date format" });
-        }
-
-        const readings = await sensorDB.getHumidities(start, end);
-        res.json(readings);
-    } catch (error) {
-        console.error("Error getting humidity readings:", error);
-        res.status(500).json({ error: "Failed to get humidity readings" });
-    }
-});
-
-// API Method 6: Get gas readings
-app.get("/api/readings/gas", async (req, res) => {
-    try {
-        const { startDate, endDate } = req.query;
-
-        if (!startDate || !endDate) {
-            return res
-                .status(400)
-                .json({ error: "Both startDate and endDate are required" });
-        }
-
-        const start = new Date(startDate as string);
-        const end = new Date(endDate as string);
-
-        if (isNaN(start.getTime()) || isNaN(end.getTime())) {
-            return res.status(400).json({ error: "Invalid date format" });
-        }
-
-        const readings = await sensorDB.getGases(start, end);
-        res.json(readings);
-    } catch (error) {
-        console.error("Error getting gas readings:", error);
-        res.status(500).json({ error: "Failed to get gas readings" });
-    }
-});
-
-// API Method 7: Delete readings within date range
+/* =======================
+DELETE READINGS
+======================= */
 app.delete("/api/readings", async (req, res) => {
+
     try {
+
         const { startDate, endDate } = req.query;
-
-        if (!endDate) {
+        
+        if (!endDate)
             return res.status(400).json({ error: "endDate is required" });
-        }
-
+        
+        const start = startDate ? new Date(startDate as string) : new Date(0);
         const end = new Date(endDate as string);
-        if (isNaN(end.getTime())) {
-            return res.status(400).json({ error: "Invalid endDate format" });
-        }
-
-        const start = startDate ? new Date(startDate as string) : null;
-        if (startDate && isNaN(start!.getTime())) {
-            return res.status(400).json({ error: "Invalid startDate format" });
-        }
-
-        const deleted = await sensorDB.deleteReadings(start, end);
+        
+        if (isNaN(end.getTime()))
+            return res.status(400).json({ error: "Invalid endDate" });
+        
+        const deleted = await sqliteService.deleteReadings(start, end);
+        
         res.json({
             message: `Deleted ${deleted.length} readings`,
-            deleted: deleted,
+            deleted
         });
+
     } catch (error) {
+
         console.error("Error deleting readings:", error);
         res.status(500).json({ error: "Failed to delete readings" });
+
     }
+
 });
 
-// ===== ADDITIONAL USEFUL ENDPOINTS =====
+/* =======================
+RESET DATABASE
+======================= */
+app.delete("/api/reset", async (_req, res) => {
 
-// Get latest readings (all types)
-app.get("/api/readings/latest", async (req, res) => {
     try {
-        const latest = await sensorDB.getLatestReadings();
-        res.json(latest);
+
+        await sqliteService.resetDatabase();
+        res.json({ message: "Database reset successful" });
+
     } catch (error) {
-        console.error("Error getting latest readings:", error);
-        res.status(500).json({ error: "Failed to get latest readings" });
+
+        console.error("Error resetting database:", error);
+        res.status(500).json({ error: "Failed to reset database" });
+
     }
+
 });
 
-// ESP32 compatible endpoint
-app.post("/api/esp32/readings", async (req, res) => {
-    try {
-        const { temperatureC, humidity, gas } = req.body;
-        const createdAt = new Date();
+/* =======================
+START SERVER
+======================= */
 
-        const readings: any = {};
+const formattedHost = IpUtils.isAllZeroesAddress(API_HOST) ? IpUtils.getLocalIpAddress() : API_HOST;
+if (!formattedHost) {
 
-        if (temperatureC !== undefined) {
-            readings.temperatureC = {
-                createdAt,
-                readingType: "temperatureC" as const,
-                value: parseFloat(temperatureC),
-            };
-        }
+    console.error("Unable to determine local IP address for API_HOST:", API_HOST);
+    process.exit(1);
 
-        if (humidity !== undefined) {
-            readings.humidity = {
-                createdAt,
-                readingType: "humidity" as const,
-                value: parseFloat(humidity),
-            };
-        }
+}
 
-        if (gas !== undefined) {
-            readings.gas = {
-                createdAt,
-                readingType: "gas" as const,
-                value: parseFloat(gas),
-            };
-        }
-
-        const result = await sensorDB.createReadings(
-            readings.temperatureC,
-            readings.humidity,
-            readings.gas,
-        );
-
-        res.status(201).json(result);
-    } catch (error) {
-        console.error("Error saving ESP32 readings:", error);
-        res.status(500).json({ error: "Failed to save ESP32 readings" });
-    }
-});
-
-// Start server
-app.listen(PORT, HOST, () => {
+app.listen(API_PORT, API_HOST, () => {
     console.log(`
 🚀 ESP32 Sensor API Server
 ===========================
-📍 Port: ${PORT}
-💾 Database: SQLite (database/sensor.db)
-🔗 Health check: http://${HOST}:${PORT}/health
-
-📝 YOUR EXACT API METHODS:
-  POST   /api/reading          - createReading(createdAt, readingType, value)
-  POST   /api/readings         - createReadings(temperatureC?, humidity?, gas?)
-  GET    /api/readings         - getReadings(startDate, endDate)
-  GET    /api/readings/temperature - getTemperaturesC(startDate, endDate)
-  GET    /api/readings/humidity    - getHumidities(startDate, endDate)
-  GET    /api/readings/gas         - getGases(startDate, endDate)
-  DELETE /api/readings         - deleteReadings(startDate?, endDate)
-
-📝 ADDITIONAL ENDPOINTS:
-  GET    /api/readings/latest  - Get latest readings of each type
-  GET    /api/readings/stats   - Get statistics
-  POST   /api/esp32/readings   - ESP32 compatible endpoint
+📍 Host: ${formattedHost}
+📍 Port: ${API_PORT}
+💾 Database: ${process.env.DATABASE_PATH}
+🔗 Health: http://${formattedHost}:${API_PORT}/health
+        
+📝 API METHODS:
+  POST   /api/reading
+  GET    /api/readings
+  DELETE /api/readings
+  DELETE /api/reset
   `);
 });
+    
+/* =======================
+GRACEFUL SHUTDOWN
+======================= */
 
-// Graceful shutdown
-process.on("SIGTERM", async () => {
+const shutdown = async () => {
     console.log("Shutting down gracefully...");
-    await sensorDB.close();
+    await sqliteService.close();
     process.exit(0);
-});
+}
 
-process.on("SIGINT", async () => {
-    console.log("Shutting down gracefully...");
-    await sensorDB.close();
-    process.exit(0);
-});
+process.on("SIGTERM", shutdown);
+process.on("SIGINT", shutdown);
