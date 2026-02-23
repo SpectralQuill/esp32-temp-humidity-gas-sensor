@@ -1,5 +1,3 @@
-type SensorReadingType = "temperatureC" | "humidity" | "gas";
-
 // Initial for backend
 
 interface Esp32Data {
@@ -10,31 +8,31 @@ interface Esp32Data {
     timestamp?: Date;
 }
 
-interface SensorReading {
+interface SensorReadingOld {
     createdAt: Date;
     readingType: SensorReadingType;
     value: number;
 }
 
-interface DBSensorReading {
+interface DBSensorReadingOld {
     createdAt: string; // ISO string
     readingType: SensorReadingType;
     value: number;
 }
 
-interface BatchSensorReadingsResult {
+interface BatchSensorReadingOldsResult {
     createdAt: Date;
-    temperatureC?: SensorReading;
-    humidity?: SensorReading;
-    gas?: SensorReading;
+    temperatureC?: SensorReadingOld;
+    humidity?: SensorReadingOld;
+    gas?: SensorReadingOld;
 }
 
-// Final for backend
+// was final for backend
 
-interface LatestSensorReadings {
-    temperatureC?: SensorReading;
-    humidity?: SensorReading;
-    gas?: SensorReading;
+interface LatestSensorReadingOlds {
+    temperatureC?: SensorReadingOld;
+    humidity?: SensorReadingOld;
+    gas?: SensorReadingOld;
 }
 
 // Sensor Chart
@@ -47,3 +45,39 @@ interface SensorChartDataPoint {
 }
 
 type SensorChartData = SensorChartDataPoint[];
+
+
+// new
+
+type SensorReadingType = "temperatureC" | "humidity" | "gas";
+
+interface Esp32ApiHealth {
+    status: "healthy" | "unhealthy";
+    service: string;
+    timestamp: string;
+    database: string;
+    databaseStatus: "reachable" | "unreachable";
+    uptime: number;
+    sampleReadingExists: boolean;
+}
+
+interface SensorReadingRow {
+    createdAt: string;
+    temperatureC: number;
+    humidity: number;
+    gas: number;
+}
+
+interface SensorReading {
+    createdAt: Date;
+    temperatureC: number;
+    humidity: number;
+    gas: number;
+}
+
+interface SensorReadingChartPoint {
+    timestamp: number;
+    temperatureC: number;
+    humidity: number;
+    gas: number;
+}
