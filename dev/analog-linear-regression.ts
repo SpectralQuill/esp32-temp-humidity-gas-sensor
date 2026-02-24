@@ -145,12 +145,12 @@ function main(): void {
 
     const files = [
         {
-            path: "data/analog_to_percentage.csv",
+            path: "esp32/data/analog_to_percentage.csv",
             xLabel: "Analog",
             yLabel: "Percentage",
         },
         {
-            path: "data/analog_to_temp_c.csv",
+            path: "esp32/data/analog_to_temp_c.csv",
             xLabel: "Analog",
             yLabel: "Temp_C",
         },

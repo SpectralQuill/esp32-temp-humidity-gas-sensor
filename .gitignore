@@ -138,11 +138,9 @@ web_modules/
 # Project Specific
 # ============================================
 
-# Proteus
-proteus/Project Backups
-
-# Arduino
-arduino/*/build
+# ESP32
+esp32/src/*/build
+esp32/proteus/Project Backups
 
 # Local development files
 *.local
