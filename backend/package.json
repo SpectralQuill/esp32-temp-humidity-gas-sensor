@@ -6,7 +6,7 @@
         "dev": "tsx watch src/server.ts",
         "start": "node dist/server.js",
         "build": "tsc",
-        "reset-db": "tsx scripts/resetDatabase.ts",
+        "reset-db": "tsx scripts/reset-db.ts",
         "serial-listener": "tsx src/serialListener.ts"
     },
     "dependencies": {
