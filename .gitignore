@@ -154,5 +154,5 @@ __pycache__/
 ~$*.xlsx
 
 # Databases
-database/*.db
-database/*.db.backup
+*.db
+*.db.backup
