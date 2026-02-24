@@ -9,7 +9,7 @@ const DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
 
 export class Esp32SqliteService {
 
-    private static databaseName: string = "SQLite";
+    private static readonly databaseName: string = "SQLite";
     
     private static convertSensorReadingRow(row: SensorReadingRow): SensorReading {
 
@@ -92,10 +92,11 @@ export class Esp32SqliteService {
         try {
 
             const data = await this.database
-            .selectFrom(tableName)
-            .select("createdAt")
-            .limit(1)
-            .execute();
+                .selectFrom(tableName)
+                .select("createdAt")
+                .limit(1)
+                .execute()
+            ;
             
             return {
                 status: "healthy",

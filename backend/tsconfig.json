@@ -15,6 +15,6 @@
         "isolatedModules": true,
         "noEmit": true
     },
-    "include": ["src/**/*", "../types/**/*"],
+    "include": ["src/**/*", "../types/**/*", "scripts/**/*"],
     "exclude": ["node_modules", "dist"]
 }
