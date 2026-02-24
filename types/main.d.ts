@@ -1,55 +1,13 @@
-// Initial for backend
+/* =======================
+GENERAL TYPES
+======================= */
 
-interface Esp32Data {
-    temperatureC?: number;
-    humidity?: number;
-    gas?: number;
-    raw?: string;
-    timestamp?: Date;
-}
-
-interface SensorReadingOld {
-    createdAt: Date;
-    readingType: SensorReadingType;
-    value: number;
-}
-
-interface DBSensorReadingOld {
-    createdAt: string; // ISO string
-    readingType: SensorReadingType;
-    value: number;
-}
-
-interface BatchSensorReadingOldsResult {
-    createdAt: Date;
-    temperatureC?: SensorReadingOld;
-    humidity?: SensorReadingOld;
-    gas?: SensorReadingOld;
-}
-
-// was final for backend
-
-interface LatestSensorReadingOlds {
-    temperatureC?: SensorReadingOld;
-    humidity?: SensorReadingOld;
-    gas?: SensorReadingOld;
-}
-
-// Sensor Chart
-
-interface SensorChartDataPoint {
-    timestamp: number;
-    temperatureC: number | null;
-    humidity: number | null;
-    gas: number | null;
-}
-
-type SensorChartData = SensorChartDataPoint[];
-
-
-// new
-
+type BooleanString = "true" | "false";
 type SensorReadingType = "temperatureC" | "humidity" | "gas";
+
+/* =======================
+ESP32 API
+======================= */
 
 interface Esp32ApiHealth {
     status: "healthy" | "unhealthy";
@@ -61,15 +19,19 @@ interface Esp32ApiHealth {
     sampleReadingExists: boolean;
 }
 
-interface SensorReadingRow {
-    createdAt: string;
+/* =======================
+SENSOR READINGS
+======================= */
+
+interface SensorReading {
+    createdAt: Date;
     temperatureC: number;
     humidity: number;
     gas: number;
 }
 
-interface SensorReading {
-    createdAt: Date;
+interface SensorReadingRow {
+    createdAt: string;
     temperatureC: number;
     humidity: number;
     gas: number;
@@ -80,4 +42,33 @@ interface SensorReadingChartPoint {
     temperatureC: number;
     humidity: number;
     gas: number;
+}
+
+/* =======================
+API DTOs
+======================= */
+
+interface CreateReadingDto {
+    createdAt?: string;
+    temperatureC: number;
+    humidity: number;
+    gas: number;
+}
+
+interface GetReadingsDto {
+    startDate?: string;
+    endDate?: string;
+    excludeStartDate?: BooleanString;
+    excludeEndDate?: BooleanString;
+}
+
+interface DeleteReadingsDto {
+    startDate?: string;
+    endDate?: string;
+    excludeStartDate?: BooleanString;
+    excludeEndDate?: BooleanString;
+}
+
+interface MessageResponse {
+    message: string;
 }

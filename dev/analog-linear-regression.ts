@@ -1,4 +1,3 @@
-// linear-regression.ts
 import * as fs from "fs";
 import * as path from "path";
 
@@ -15,7 +14,9 @@ interface RegressionResult {
 }
 
 class LinearRegression {
+
     static calculate(data: DataPoint[]): RegressionResult {
+
         const n = data.length;
 
         // Calculate sums
@@ -56,11 +57,15 @@ class LinearRegression {
             rSquared,
             formula: `y = ${m.toFixed(4)}x ${b >= 0 ? "+" : ""}${b.toFixed(4)}`,
         };
+
     }
+
 }
 
 class CSVReader {
+
     static parseFile(filePath: string): DataPoint[] {
+
         const data: DataPoint[] = [];
 
         try {
@@ -90,10 +95,13 @@ class CSVReader {
         }
 
         return data;
+
     }
+
 }
 
 function analyzeCSV(filePath: string, xLabel: string, yLabel: string): void {
+
     console.log(`\n${"=".repeat(60)}`);
     console.log(`Analyzing: ${path.basename(filePath)}`);
     console.log(`X: ${xLabel}, Y: ${yLabel}`);
@@ -137,9 +145,11 @@ function analyzeCSV(filePath: string, xLabel: string, yLabel: string): void {
             console.log(`  When x = ${x.toFixed(2)}, y ≈ ${y.toFixed(2)}`);
         }
     }
+
 }
 
 function main(): void {
+
     console.log("📈 Linear Regression Analysis");
     console.log("=".repeat(60));
 
@@ -175,6 +185,7 @@ function main(): void {
 
     console.log("\n" + "=".repeat(60));
     console.log("✅ Analysis complete!");
+
 }
 
 // Run the analysis

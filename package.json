@@ -13,8 +13,6 @@
         "serial-listener": "cd backend && npm run serial-listener"
     },
     "dependencies": {
-        "@types/serialport": "^8.0.5",
-        "child_process": "^1.0.2",
         "dotenv": "^17.2.3",
         "fs": "^0.0.1-security",
         "open": "^11.0.0",
@@ -23,6 +21,7 @@
     },
     "devDependencies": {
         "@types/node": "^24.10.9",
+        "@types/serialport": "^8.0.5",
         "prettier": "^3.8.1",
         "tsx": "^4.21.0",
         "typescript": "~5.9.3"

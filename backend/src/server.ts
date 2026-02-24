@@ -12,7 +12,6 @@ const sqliteService = new Esp32SqliteService();
 await sqliteService.initialize();
 
 let apiConfig: ApiConfig;
-
 try {
 
     apiConfig = new ApiConfig(
@@ -28,7 +27,6 @@ try {
     process.exit(1);
 
 }
-
 const API_HOST = apiConfig.getHost();
 const API_PORT = apiConfig.getPort();
 
@@ -42,7 +40,9 @@ HEALTH CHECK
 app.get("/health", async (_req, res) => {
 
     const health = await sqliteService.getHealth();
-    const isHealthy = (health.status === "healthy" && health.databaseStatus === "reachable");
+    const isHealthy = (
+        (health.status === "healthy") && (health.databaseStatus === "reachable")
+    );
     const statusCode = isHealthy ? 200 : 503;
     res.status(statusCode).json(health);
 
@@ -54,25 +54,24 @@ CREATE SINGLE ROW
 app.post("/api/reading", async (req, res) => {
 
     try {
-        const { createdAt, temperatureC, humidity, gas } = req.body;
-        
+
+        const {
+            createdAt: createdAtIso, temperatureC, humidity, gas
+        } = req.body as CreateReadingDto;
         if (
             temperatureC === undefined ||
             humidity === undefined ||
             gas === undefined
-        ) {
-            return res.status(400).json({
-                error: "temperatureC, humidity, and gas are required"
-            });
-        }
+        ) return res.status(400).json({
+            error: "temperatureC, humidity, and gas are required"
+        });
         
-        const date = createdAt ? new Date(createdAt) : null;
-        if (createdAt && isNaN(date!.getTime())) {
+        const createdAt = createdAtIso ? new Date(createdAtIso) : null;
+        if (createdAt && isNaN(createdAt.getTime()))
             return res.status(400).json({ error: "Invalid createdAt date" });
-        }
         
         const reading = await sqliteService.createReading(
-            date,
+            createdAt,
             Number(temperatureC),
             Number(humidity),
             Number(gas)
@@ -90,28 +89,28 @@ app.post("/api/reading", async (req, res) => {
 });
 
 /* =======================
-GET READINGS BY DATE RANGE
+GET READINGS
 ======================= */
 app.get("/api/readings", async (req, res) => {
 
     try {
 
-        const { startDate, endDate, excludeStart, excludeEnd } = req.query;
-        
-        const start = startDate ? new Date(startDate as string) : null;
-        const end = endDate ? new Date(endDate as string) : null;
-        
-        if (startDate && isNaN(start!.getTime()))
+        const {
+            startDate: startDateIso, endDate: endDateIso,
+            excludeStartDate, excludeEndDate
+        } = req.query as GetReadingsDto;
+        const startDate = startDateIso ? new Date(startDateIso as string) : null;
+        const endDate = endDateIso ? new Date(endDateIso as string) : null;
+        if (startDate && isNaN(startDate.getTime()))
             return res.status(400).json({ error: "Invalid startDate" });
-        
-        if (endDate && isNaN(end!.getTime()))
+        if (endDate && isNaN(endDate.getTime()))
             return res.status(400).json({ error: "Invalid endDate" });
         
         const readings = await sqliteService.getReadings(
-            start,
-            end,
-            excludeStart === "true",
-            excludeEnd === "true"
+            startDate,
+            endDate,
+            excludeStartDate === "true",
+            excludeEndDate === "true"
         );
         
         res.json(readings);
@@ -126,29 +125,73 @@ app.get("/api/readings", async (req, res) => {
 });
 
 /* =======================
+GET MAX CREATED AT DATE
+======================= */
+app.get("/api/readings/max-created-at", async (_req, res) => {
+
+    try {
+
+        const maxCreatedAt = await sqliteService.getMaxCreatedAt();
+        res.status(200).json({ maxCreatedAt });
+
+    } catch (error) {
+
+        console.error("Error getting max createdAt:", error);
+        res.status(500).json({ error: "Failed to get max createdAt" });
+
+    }
+
+});
+
+/* =======================
+GET MIN CREATED AT DATE
+======================= */
+app.get("/api/readings/min-created-at", async (_req, res) => {
+
+    try {
+
+        const minCreatedAt = await sqliteService.getMinCreatedAt();
+        res.status(200).json({ minCreatedAt });
+
+    } catch (error) {
+
+        console.error("Error getting min createdAt:", error);
+        res.status(500).json({ error: "Failed to get min createdAt" });
+
+    }
+
+});
+
+/* =======================
 DELETE READINGS
 ======================= */
 app.delete("/api/readings", async (req, res) => {
 
     try {
 
-        const { startDate, endDate } = req.query;
-        
-        if (!endDate)
+        const {
+            startDate: startDateIso, endDate: endDateIso,
+            excludeStartDate, excludeEndDate
+        } = req.query as DeleteReadingsDto;
+        if (!startDateIso)
+            return res.status(400).json({ error: "startDate is required" });
+        if (!endDateIso)
             return res.status(400).json({ error: "endDate is required" });
-        
-        const start = startDate ? new Date(startDate as string) : new Date(0);
-        const end = new Date(endDate as string);
-        
-        if (isNaN(end.getTime()))
+        const startDate = new Date(startDateIso);
+        const endDate = new Date(endDateIso);
+        if (isNaN(startDate.getTime()))
+            return res.status(400).json({ error: "Invalid startDate" });
+        if (isNaN(endDate.getTime()))
             return res.status(400).json({ error: "Invalid endDate" });
-        
-        const deleted = await sqliteService.deleteReadings(start, end);
-        
-        res.json({
-            message: `Deleted ${deleted.length} readings`,
-            deleted
-        });
+
+        const deleted = await sqliteService.deleteReadings(
+            startDate,
+            endDate,
+            excludeStartDate === "true",
+            excludeEndDate === "true"
+        );
+
+        res.json(deleted);
 
     } catch (error) {
 
@@ -167,7 +210,7 @@ app.delete("/api/reset", async (_req, res) => {
     try {
 
         await sqliteService.resetDatabase();
-        res.json({ message: "Database reset successful" });
+        res.status(200).json({ message: "Database reset successful" });
 
     } catch (error) {
 
@@ -182,7 +225,9 @@ app.delete("/api/reset", async (_req, res) => {
 START SERVER
 ======================= */
 
-const formattedHost = IpUtils.isAllZeroesAddress(API_HOST) ? IpUtils.getLocalIpAddress() : API_HOST;
+const formattedHost = (
+    IpUtils.isAllZeroesAddress(API_HOST) ? IpUtils.getLocalIpAddress() : API_HOST
+);
 if (!formattedHost) {
 
     console.error("Unable to determine local IP address for API_HOST:", API_HOST);
@@ -201,7 +246,11 @@ app.listen(API_PORT, API_HOST, () => {
         
 📝 API METHODS:
   POST   /api/reading
+
   GET    /api/readings
+  GET    /api/readings/max-created-at
+  GET    /api/readings/min-created-at
+
   DELETE /api/readings
   DELETE /api/reset
   `);

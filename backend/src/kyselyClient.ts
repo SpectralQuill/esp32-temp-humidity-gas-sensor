@@ -14,14 +14,12 @@ const { DATABASE_TABLE_NAME } = process.env;
 if (!DATABASE_TABLE_NAME) throw new Error("DATABASE_TABLE_NAME env variable not set");
 
 export interface DatabaseSchema {
-
     [DATABASE_TABLE_NAME]: SensorReadingRow;
-
 }
 
 export class Esp32KyselyClient {
 
-    private database: Kysely<DatabaseSchema>;
+    private readonly database: Kysely<DatabaseSchema>;
 
     public constructor() {
 
