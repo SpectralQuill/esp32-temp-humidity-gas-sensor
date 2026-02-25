@@ -4,7 +4,7 @@ import { ApiConfig } from "../utils/ApiConfig";
 import cors from "cors";
 import { Esp32SqliteService } from "./sqliteService";
 import express from "express";
-import { IpUtils } from "../utils/IpUtils";
+import { IpAddressUtils } from "../utils/IpAddressUtils";
 
 const app = express();
 const sqliteService = new Esp32SqliteService();
@@ -226,7 +226,8 @@ START SERVER
 ======================= */
 
 const formattedHost = (
-    IpUtils.isAllZeroesAddress(API_HOST) ? IpUtils.getLocalIpAddress() : API_HOST
+    IpAddressUtils.isAllZeroesAddress(API_HOST) ? IpAddressUtils.getLocalIpAddress()
+    : API_HOST
 );
 if (!formattedHost) {
 

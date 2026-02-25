@@ -6,6 +6,7 @@
         "dev": "tsx watch src/server.ts",
         "start": "node dist/server.js",
         "build": "tsc",
+        "get-ip": "tsx scripts/get-ip.ts",
         "reset-db": "tsx scripts/reset-db.ts",
         "serial-listener": "tsx src/serialListener.ts"
     },
