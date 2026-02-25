@@ -1,6 +1,7 @@
 import {
-    DatabaseSchema,
-    Esp32KyselyClient
+    Esp32DatabaseSchema,
+    Esp32KyselyClient,
+    Esp32DatabaseTableNames
 } from "./kyselyClient";
 import { format as formatDate } from "date-fns";
 import { Kysely } from "kysely";
@@ -24,19 +25,16 @@ export class Esp32SqliteService {
 
     private kyselyClient: Esp32KyselyClient | null = null;
     private serviceName: string;
-    private tableName: string;
 
     public constructor() {
 
-        const { API_SERVICE_NAME, DATABASE_TABLE_NAME } = process.env;
+        const { API_SERVICE_NAME } = process.env;
         if (!API_SERVICE_NAME) throw new Error("API_SERVICE_NAME env variable not set");
-        if (!DATABASE_TABLE_NAME) throw new Error("DATABASE_TABLE_NAME env variable not set");
         this.serviceName = API_SERVICE_NAME;
-        this.tableName = DATABASE_TABLE_NAME;
 
     }
 
-    private get database(): Kysely<DatabaseSchema> {
+    private get database(): Kysely<Esp32DatabaseSchema> {
 
         if (!this.kyselyClient) throw new Error("Kysely client not initialized");
         return this.kyselyClient.connection;
@@ -75,29 +73,29 @@ export class Esp32SqliteService {
             gas
         };
         
-        await this.database.insertInto(this.tableName).values(reading).execute();
+        await this.database.insertInto(Esp32DatabaseTableNames.SensorReadings).values(reading).execute();
         
         const formattedDate = formatDate(createdAt, DATE_FORMAT);
         console.log(
-            `✅ Creating reading at ${formattedDate} - Temp: ${temperatureC}°C, Humidity: ${humidity}, Gas: ${gas}`
+            `✅ Creating reading at ${formattedDate} - Temp: ${
+            temperatureC}°C, Humidity: ${humidity}, Gas: ${gas}`
         );
         
         return { createdAt, temperatureC, humidity, gas };
         
     }
     
-    public async getHealth(): Promise<Esp32ApiHealth> {
+    public async getHealth(): Promise<ApiHealth> {
 
-        const { tableName, serviceName } = this;
+        const { serviceName } = this;
         try {
 
             const data = await this.database
-                .selectFrom(tableName)
+                .selectFrom(Esp32DatabaseTableNames.SensorReadings)
                 .select("createdAt")
                 .limit(1)
                 .execute()
             ;
-            
             return {
                 status: "healthy",
                 service: serviceName,
@@ -127,15 +125,18 @@ export class Esp32SqliteService {
     public async getReadings(
         startDate: Date | null,
         endDate: Date | null,
-        excludeStartDate: boolean | null,
-        excludeEndDate: boolean | null
+        excludeStartDate: boolean | null = false,
+        excludeEndDate: boolean | null = false
     ): Promise<SensorReading[]> {
         
         if (!startDate) startDate = await this.getMinCreatedAt() ?? new Date(0);
         if (!endDate) endDate = await this.getMaxCreatedAt() ?? new Date();
         if (startDate > endDate) throw new Error("Start date cannot be after end date");
         
-        let query = this.database.selectFrom(this.tableName).selectAll();
+        let query = this.database
+            .selectFrom(Esp32DatabaseTableNames.SensorReadings)
+            .selectAll()
+        ;
         query = (
             excludeStartDate ? query.where("createdAt", ">", startDate.toISOString())
             : query.where("createdAt", ">=", startDate.toISOString())
@@ -145,7 +146,7 @@ export class Esp32SqliteService {
             : query.where("createdAt", "<=", endDate.toISOString())
         );
         query = query.orderBy("createdAt", "asc");
-        const rows = await query.execute();
+        const rows = (await query.execute()) as SensorReadingRow[];
         
         return rows.map(Esp32SqliteService.convertSensorReadingRow);
 
@@ -154,7 +155,7 @@ export class Esp32SqliteService {
     public async getMaxCreatedAt(): Promise<Date | null> {
 
         const row = await this.database
-            .selectFrom(this.tableName)
+            .selectFrom(Esp32DatabaseTableNames.SensorReadings)
             .select("createdAt")
             .orderBy("createdAt", "desc")
             .limit(1)
@@ -167,7 +168,7 @@ export class Esp32SqliteService {
     public async getMinCreatedAt(): Promise<Date | null> {
 
         const row = await this.database
-            .selectFrom(this.tableName)
+            .selectFrom(Esp32DatabaseTableNames.SensorReadings)
             .select("createdAt")
             .orderBy("createdAt", "asc")
             .limit(1)
@@ -185,7 +186,7 @@ export class Esp32SqliteService {
     ): Promise<SensorReading[]> {
         
         let query = this.database
-            .deleteFrom(this.tableName)
+            .deleteFrom(Esp32DatabaseTableNames.SensorReadings)
             .where(
                 "createdAt",
                 excludeStartDate ? ">" : ">=",
@@ -198,10 +199,12 @@ export class Esp32SqliteService {
             )
             .returningAll()
         ;
-        const deleted = await query.execute();
+        const deleted = (await query.execute()) as SensorReadingRow[];
         const formattedStartDate = formatDate(startDate, DATE_FORMAT);
         const formattedEndDate = formatDate(endDate, DATE_FORMAT);
-        console.log(`✅ Deleted readings from ${formattedStartDate} to ${formattedEndDate}`);
+        console.log(
+            `✅ Deleted readings from ${formattedStartDate} to ${formattedEndDate}`
+        );
         
         return deleted.map(Esp32SqliteService.convertSensorReadingRow);
 
@@ -209,7 +212,7 @@ export class Esp32SqliteService {
     
     public async resetDatabase(): Promise<void> {
 
-        await this.database.deleteFrom(this.tableName).execute();
+        await this.database.deleteFrom(Esp32DatabaseTableNames.SensorReadings).execute();
         console.log("✅ Database reset");
 
     }

@@ -1,11 +1,10 @@
+import "../scripts/set-env";
+
 import { ApiConfig } from "../utils/ApiConfig";
 import cors from "cors";
-import dotenv from "dotenv";
 import { Esp32SqliteService } from "./sqliteService";
 import express from "express";
 import { IpUtils } from "../utils/IpUtils";
-
-dotenv.config();
 
 const app = express();
 const sqliteService = new Esp32SqliteService();
@@ -39,6 +38,7 @@ HEALTH CHECK
 ======================= */
 app.get("/health", async (_req, res) => {
 
+    console.log("🩺 Received health check request");
     const health = await sqliteService.getHealth();
     const isHealthy = (
         (health.status === "healthy") && (health.databaseStatus === "reachable")
@@ -98,7 +98,7 @@ app.get("/api/readings", async (req, res) => {
         const {
             startDate: startDateIso, endDate: endDateIso,
             excludeStartDate, excludeEndDate
-        } = req.query as GetReadingsDto;
+        } = req.query as DateRangeDto;
         const startDate = startDateIso ? new Date(startDateIso as string) : null;
         const endDate = endDateIso ? new Date(endDateIso as string) : null;
         if (startDate && isNaN(startDate.getTime()))
@@ -113,7 +113,7 @@ app.get("/api/readings", async (req, res) => {
             excludeEndDate === "true"
         );
         
-        res.json(readings);
+        res.status(200).json(readings);
 
     } catch (error) {
 
@@ -172,7 +172,7 @@ app.delete("/api/readings", async (req, res) => {
         const {
             startDate: startDateIso, endDate: endDateIso,
             excludeStartDate, excludeEndDate
-        } = req.query as DeleteReadingsDto;
+        } = req.query as DateRangeDto;
         if (!startDateIso)
             return res.status(400).json({ error: "startDate is required" });
         if (!endDateIso)
@@ -191,7 +191,7 @@ app.delete("/api/readings", async (req, res) => {
             excludeEndDate === "true"
         );
 
-        res.json(deleted);
+        res.status(200).json(deleted);
 
     } catch (error) {
 
