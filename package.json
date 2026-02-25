@@ -8,6 +8,7 @@
         "backend": "cd backend && npm run dev",
         "format": "prettier --write . --tab-width 4",
         "frontend": "cd frontend && npm run dev",
+        "get-ip": "cd backend && npm run get-ip",
         "init": "npm install && cd backend && npm install && cd ../frontend && npm install",
         "reset-db": "cd backend && npm run reset-db",
         "serial-listener": "cd backend && npm run serial-listener"
