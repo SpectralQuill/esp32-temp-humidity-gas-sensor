@@ -1,7 +1,7 @@
 import { subMinutes } from "date-fns";
 import { useEffect, useState } from "react";
 
-export function useDateRangeRefresher(
+export function useNowDateRangeRefresher(
     refreshIntervalMs: number,
     rangeBeforeMin: number,
     active: boolean

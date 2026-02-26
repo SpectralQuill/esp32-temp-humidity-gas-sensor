@@ -1,4 +1,4 @@
-export const SAFETY_LEVELS_SEED_DATA: ReadonlyArray<SafetyLevel> = [
+export const SAFETY_LEVELS_SEED_DATA = [
 
     /* ================= TEMPERATURE ================= */
     { readingType: "temperatureC", label: "Extreme Cold", threshold: 0, color: "1e90ff", level: "Warning" },
@@ -31,4 +31,4 @@ export const SAFETY_LEVELS_SEED_DATA: ReadonlyArray<SafetyLevel> = [
     { readingType: "general", label: "Good", threshold: 0, color: "4caf50", level: "Good" },
     { readingType: "general", label: "Warning", threshold: 1, color: "ff9800", level: "Warning" },
     { readingType: "general", label: "Danger", threshold: 2, color: "8b0000", level: "Danger" }
-];
+] as const satisfies ReadonlyArray<SafetyLevel>;

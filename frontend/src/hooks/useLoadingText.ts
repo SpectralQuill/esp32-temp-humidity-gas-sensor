@@ -1,25 +1,32 @@
-import { useEffect, useState } from "react";
+import {
+    useEffect,
+    useState
+} from "react";
 
-type LoadingTextIndex = 0 | 1 | 2 | 3;
-
-const LOADING_TEXTS: string[] = ["", ".", "..", "..."];
-const LOADING_TEXT_INTERVAL_MS: number = 500;
+export const LOADING_TEXTS: ReadonlyArray<string> = ["", ".", "..", "..."] as const;
 
 /**
  * Custom React hook for generating a loading text that cycles through a series of dots.
  * @returns A string representing the current loading text.
  */
-export function useLoadingText() {
-    const [index, setIndex] = useState<LoadingTextIndex>(0);
+export function useLoadingText(
+    loadingIntervalMs: number = 500,
+    loadingTexts: string[] = LOADING_TEXTS as string[]
+) {
+
+    const { length } = loadingTexts;
+    const [index, setIndex] = useState<number>(0);
 
     useEffect(() => {
-        const intervalId = setInterval(() => {
-            const nextIndex = ((index + 1) %
-                LOADING_TEXTS.length) as LoadingTextIndex;
-            setIndex(nextIndex);
-        }, LOADING_TEXT_INTERVAL_MS);
-        return () => clearInterval(intervalId);
-    }, [index]);
 
-    return LOADING_TEXTS[index];
+        const intervalId = setInterval(() => {
+            const nextIndex = (index + 1) % length;
+            setIndex(nextIndex);
+        }, loadingIntervalMs);
+        return () => clearInterval(intervalId);
+
+    }, []);
+
+    return loadingTexts[index];
+
 }
