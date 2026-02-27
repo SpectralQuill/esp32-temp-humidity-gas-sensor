@@ -1,51 +1,36 @@
-import { Esp32Api } from "../api/Esp32Api";
+import { useCount } from "./useCount";
 import {
     useEffect,
     useState
 } from "react";
 
-export const FAILED_SIMULATED_API_HEALTH = {
-    status: "unhealthy",
-    databaseStatus: "unreachable"
-} as const;
-
-export const SUCCESS_SIMULATED_API_HEALTH = {
-    status: "healthy",
-    databaseStatus: "reachable"
-} as const;
-
 export function useApiConnection(
-    api: Esp32Api,
+    connect: () => Promise<boolean> | boolean,
     connectionIntervalMs: number = 1000,
     maxConnectionAttempCount: number = Infinity,
     isSimulated: boolean = false
 ): [boolean, boolean] {
 
-    const [connectionCount, setConnectionCount] = useState<number>(0);
+    const [connectionCount, addConnectionCount] = useCount();
     const [connected, setConnected] = useState<boolean>(false);
 
-    const active: boolean = (connectionCount < maxConnectionAttempCount);
+    const connecting: boolean = (connectionCount < maxConnectionAttempCount);
 
     useEffect(() => {
 
         const intervalId = setInterval(async () => {
-            const { status, databaseStatus } = (
-                !isSimulated ? (await api.getHealth())
-                : (connectionCount < maxConnectionAttempCount) ?
-                    FAILED_SIMULATED_API_HEALTH
-                : SUCCESS_SIMULATED_API_HEALTH
+            const connected: boolean = (
+                !isSimulated ? (await connect())
+                : (connectionCount >= maxConnectionAttempCount)
             );
-            const isHealthy = (
-                (status === "healthy") && (databaseStatus === "reachable")
-            );
-            if (isHealthy) {
+            if (connected) {
 
                 setConnected(true);
                 clearInterval(intervalId);
                 return;
 
             }
-            setConnectionCount(connectionCount + 1);
+            addConnectionCount();
             if (connectionCount >= maxConnectionAttempCount)
                 clearInterval(intervalId);
         }, connectionIntervalMs);
@@ -54,6 +39,6 @@ export function useApiConnection(
 
     }, []);
 
-    return [connected, active];
+    return [connected, connecting];
 
 }

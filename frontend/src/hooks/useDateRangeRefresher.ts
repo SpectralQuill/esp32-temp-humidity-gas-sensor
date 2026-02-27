@@ -1,19 +1,20 @@
+import { DateRange } from "../utils/DateRange";
 import { subMinutes } from "date-fns";
 import { useEffect, useState } from "react";
 
-export function useNowDateRangeRefresher(
+export function useDateRangeRefresher(
     refreshIntervalMs: number,
     rangeBeforeMin: number,
     active: boolean
-): [Date, Date] {
+): DateRange {
 
     const now = new Date();
     const past = subMinutes(now, rangeBeforeMin);
 
-    const [endDate, setEndDate] = useState<Date>(now);
     const [startDate, setStartDate] = useState<Date>(past);
+    const [endDate, setEndDate] = useState<Date>(now);
 
-    async function handeUpdate(): Promise<void> {
+    function handeUpdate(): void {
 
         const now = new Date();
         const past = subMinutes(now, rangeBeforeMin);
@@ -26,13 +27,11 @@ export function useNowDateRangeRefresher(
 
         if(!active) return;
         handeUpdate();
-        const intervalId = setInterval(async () => {
-            await handeUpdate();
-        }, refreshIntervalMs);
+        const intervalId = setInterval(handeUpdate, refreshIntervalMs);
         return () => clearInterval(intervalId);
 
     }, [refreshIntervalMs, rangeBeforeMin, active]);
 
-    return [startDate, endDate];
+    return new DateRange(startDate, endDate);
 
 }

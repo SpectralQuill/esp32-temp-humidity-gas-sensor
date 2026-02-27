@@ -9,6 +9,7 @@ export function useCount(
 ] {
 
     const [count, setCount] = useState(start);
+    
     const addCount = () => setCount(count + increment);
     const resetCount = () => setCount(start);
 

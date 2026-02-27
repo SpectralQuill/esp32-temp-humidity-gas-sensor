@@ -1,40 +1,83 @@
-// import { AppContext, AppContextProps } from "./contexts/AppContext";
+import { AppContext, AppContextProps } from "./contexts/AppContext";
 // import { DangerPopup } from "./components/DangerPopup";
 // import { Dashboard } from "./components/Dashboard";
 import { EnvUtils } from "./utils/EnvUtils";
 import { Esp32Api } from "./api/Esp32Api";
 import { ESP32_FRONTEND_ENV_SCHEMA_DATA } from "./constants/envData";
+import { format as formatDate } from "date-fns";
+import {
+    Fragment,
+    useState
+} from "react";
 // import { Header } from "./components/Header";
 // import { StartupPopup } from "./components/StartupPopup";
 import { useApiConnection } from "./hooks/useApiConnection";
-import { useNowDateRangeRefresher } from "./hooks/useNowDateRangeRefresher";
-// import { useState } from "react";
-// import { useSensorChartData } from "./hooks/useSensorChartData";
+import { useDateRangeRefresher } from "./hooks/useDateRangeRefresher";
+import { useSensorChartData } from "./hooks/useSensorChartData";
+import { useSensorReadings } from "./hooks/useSensorReadings";
 // import { VariableLogger } from "./components/VariableLogger";
 
 import "./style/App.scss";
 
-const DEFAULT_GRAPH_RANGE_BEFORE_MIN = 5;
+const DEFAULT_GRAPH_RANGE_MIN = 5;
 
-function App() {
+export default function App() {
 
-    const {
-        VITE_API_HOST, VITE_API_PORT, VITE_API_CONNECTION_INTERVAL_MS,
-        VITE_API_MAX_CONNECTION_COUNT, VITE_API_CONNECTION_IS_SIMULATED,
-        VITE_GRAPH_REFRESH_INTERVAL_MS
-    } = EnvUtils.ensureEnv(ESP32_FRONTEND_ENV_SCHEMA_DATA);
-    const api = new Esp32Api(VITE_API_HOST, VITE_API_PORT);
+    const envMap = EnvUtils.ensureEnv(ESP32_FRONTEND_ENV_SCHEMA_DATA);
+    const [api] = useState<Esp32Api>(new Esp32Api(
+        envMap.VITE_API_HOST,
+        envMap.VITE_API_PORT
+    ));
 
-    const [isConnectedToApi, isAttemptingConnectionToApi] = useApiConnection(
-        api, VITE_API_CONNECTION_INTERVAL_MS, VITE_API_MAX_CONNECTION_COUNT,
-        VITE_API_CONNECTION_IS_SIMULATED
+    const [connectedToApi, connectingToApi] = useApiConnection(
+        () => api.checkConnection(),
+        envMap.VITE_API_CONNECTION_INTERVAL_MS,
+        envMap.VITE_API_MAX_CONNECTION_COUNT,
+        envMap.VITE_API_CONNECTION_IS_SIMULATED
     );
-    const [startDate, endDate] = useNowDateRangeRefresher(
-        VITE_GRAPH_REFRESH_INTERVAL_MS, DEFAULT_GRAPH_RANGE_BEFORE_MIN,
-        isConnectedToApi
+    const [graphRangeMin, setGraphRangeMin] = useState<number>(
+        DEFAULT_GRAPH_RANGE_MIN
     );
+    const dateRange = useDateRangeRefresher(
+        envMap.VITE_CHART_REFRESH_INTERVAL_MS,
+        graphRangeMin,
+        connectedToApi
+    );
+    const sensorReadings = useSensorReadings(api, dateRange, connectedToApi);
+    // const [sensorChartPoints, sensorChartAxisTicks] = useSensorChartData(
+    //     sensorReadings,
+    //     dateRange,
+    //     envMap.VITE_CHART_POINTS_COUNT,
+    //     connectedToApi
+    // );
+    const appContext: AppContextProps = {
+        connectedToApi, connectingToApi,
+        graphRangeMin, setGraphRangeMin,
+        sensorChartPoints: [], sensorChartAxisTicks: []
+    };
 
-    return <h1>efe</h1>
+    return <AppContext.Provider value={appContext}>
+        <table>
+            <thead><tr>
+                <td>Created at</td>
+                <td>Temp</td>
+                <td>Humidity</td>
+                <td>Gas</td>
+            </tr></thead>
+            <tbody>
+                {
+                    sensorReadings.map((reading, index) => <Fragment key={index}>
+                        <tr>
+                            <td>{formatDate(reading.createdAt, "yyyy-MM-dd HH:mm:ss")}</td>
+                            <td>{reading.temperatureC}</td>
+                            <td>{reading.humidity}</td>
+                            <td>{reading.gas}</td>
+                        </tr>
+                    </Fragment>)
+                }
+            </tbody>
+        </table>
+    </AppContext.Provider>;
 
     // const [graphRangeMin, setGraphRangeMin] = useState<number>(
     //     DEFAULT_GRAPH_RANGE_BEFORE_MIN
@@ -78,5 +121,3 @@ function App() {
     //     </AppContext.Provider>
     // );
 }
-
-export default App;

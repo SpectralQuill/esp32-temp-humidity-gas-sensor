@@ -26,6 +26,24 @@ export class Esp32Api {
         return `http://${host}:${port}`;
 
     }
+
+    public async checkConnection(): Promise<boolean> {
+
+        try {
+
+            const { status, databaseStatus } = await this.getHealth();
+            const isHealthy = (status === "healthy") && (databaseStatus === "reachable");
+            if (!isHealthy) throw new Error();
+            return isHealthy;
+
+        } catch (error) {
+
+            console.error(`❌ Failed to connect to API`);
+            return false;
+
+        }
+
+    }
     
     /* =========================
     HEALTH
@@ -52,10 +70,21 @@ export class Esp32Api {
         const params: DateRangeDto = this.setDateRangeParams(
             {}, startDate, endDate, excludeStartDate, excludeEndDate
         );
-        const response = await this.client.get<SensorReading[]>(
-            "/api/readings", { params }
-        );
-        return response.data;
+        try {
+
+            const { data } = await this.client.get<SensorReading[]>(
+                "/api/readings", { params }
+            );
+            data.forEach(reading => reading.createdAt = new Date(reading.createdAt));
+            return data;
+
+        } catch(error) {
+
+            console.error(`❌ Failed to fetch readings`)
+            return [];
+
+        }
+        
 
     }
     

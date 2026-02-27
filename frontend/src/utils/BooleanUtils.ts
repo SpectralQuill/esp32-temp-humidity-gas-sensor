@@ -1,5 +1,7 @@
 import { NumberUtils } from "./NumberUtils";
 
+export type BooleanString = "true" | "false";
+
 export class BooleanUtils {
 
     public static convertToBoolean(value: unknown): boolean {
