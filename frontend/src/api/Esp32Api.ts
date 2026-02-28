@@ -4,7 +4,7 @@ import { formatISO } from "date-fns";
 import {
     IPV4_REGEX,
     PORT_REGEX
-} from "../constants/ip";
+} from "../constants/ipData";
 
 export class Esp32Api {
 

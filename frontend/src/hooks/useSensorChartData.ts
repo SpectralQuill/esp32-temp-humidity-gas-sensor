@@ -1,188 +1,124 @@
-import { addMinutes } from "date-fns";
 import { AxisTick } from "recharts/types/util/types";
 import { DateRange } from "../utils/DateRange";
 import { DateUtils } from "../utils/DateUtils";
-// import {
-//     GeneralSafetyLevelProps,
-//     SafetyLevel
-// } from "../utils/SafetyLevel"
-import { NumberUtils } from "../utils/NumberUtils";
-// import { SensorApi } from "../api/SensorApi";
-// import { TICK_POINT_MIN_INTERVAL_MAP } from "../constants/tickPointMinIntervalMap";
+import {
+    SensorChartRange,
+    SENSOR_CHART_RANGES
+} from "../constants/sensorChartRangesData";
 import {
     useEffect,
-    useState
+    useMemo,
+    useRef
 } from "react";
 
-export interface SensorChartPointBucketData {
-    [timestamp: number]: {
-        temperatureC: number;
-        humidity: number;
-        gas: number;
-    }[]
-}
+export type SensortChartBucket = {
+    temperatureC: number;
+    humidity: number;
+    gas: number;
+    readingsCount: 0;
+};
 
-// const { GENERAL_SAFETY_LEVELS } = SafetyLevel;
+export const SENSOR_CHART_BUCKET_TEMPLATE = {
+    temperatureC: 0,
+    humidity: 0,
+    gas: 0,
+    readingsCount: 0
+} as const satisfies SensortChartBucket;
 
 export function useSensorChartData(
     sensorReadings: SensorReading[],
     dateRange: DateRange,
-    points: number,
     active: boolean
-): [SensorChartPoint[], AxisTick[]] {
+): [SensorChartPoint[], AxisTick[], SensorChartRange] {
 
-    const [sensorChartPoints, setSensorChartPoints] = useState<SensorChartPoint[]>([]);
-    const [sensorChartAxisTicks, setSensorChartAxisTicks] = useState<AxisTick[]>([]);
+    const oldSensorChartPointsRef = useRef<SensorChartPoint[]>([]);
+    const oldSensorAxisTicksRef = useRef<AxisTick[]>([]);
+    const oldSensorChartRangeRef = useRef<SensorChartRange>(
+        getSensorChartRange(dateRange)
+    );
+    const [sensorChartPoints, sensorChartAxisTicks, sensorChartRange] = useMemo(() => {
 
-    // function handleUpdateChartPoints(
-    //     sensorReadings: SensorReading[],
-    //     intervalMs: number,
-    //     offsetMs: number
-    // ) {
+        const { startDate, endDate } = dateRange;
+        if (
+            !active
+            || (
+                (sensorReadings.length > 0) && (
+                    (sensorReadings[0].createdAt < startDate)
+                    || (sensorReadings[sensorReadings.length - 1].createdAt > endDate)
+                )
+            )
+        ) return [
+            oldSensorChartPointsRef.current,
+            oldSensorAxisTicksRef.current,
+            oldSensorChartRangeRef.current
+        ];
 
-        
+        const sensorChartRange = getSensorChartRange(dateRange);
+        const { rangeMs, pointIntervalMs, tickIntervalMs } = sensorChartRange;
 
-    // }
+        const endDateMs = endDate.getTime();
+        const pointGapsCount = Math.floor(rangeMs / pointIntervalMs);
+        const tickGapsCount = Math.floor(rangeMs / tickIntervalMs);
+        const pointOffsetMs = endDateMs - (pointIntervalMs * pointGapsCount);
 
-    // const handleUpdateAxisTicks = (
-    //     intervalMs: number,
-    //     offsetMs: number
-    // ) => {
-
-
-
-    // }
-
-    useEffect(() => {
-
-        if (!active) return;
-        const intervalMs: number = 1000;
-        const offsetMs: number = dateRange.startDate.getTime();
-            // has to be anchored at end date
-        // handleUpdateChartPoints(sensorReadings, intervalMs, offsetMs);
-
+        const buckets = new Map<number, SensortChartBucket>();
         const sensorChartPoints: SensorChartPoint[] = [];
-        const buckets: SensorChartPointBucketData = {};
+        const sensorChartAxisTicks: AxisTick[] = [];
 
-        for(let { createdAt, temperatureC, humidity, gas } of sensorReadings) {
+        for (const { createdAt, temperatureC, humidity, gas } of sensorReadings) {
 
-            const timestamp: number = DateUtils.bucket(createdAt, intervalMs, offsetMs);
-            if (!buckets[timestamp]) buckets[timestamp] = [];
-            buckets[timestamp].push({ temperatureC, humidity, gas });
+            const timestamp = DateUtils.bucket(createdAt, pointIntervalMs, pointOffsetMs);
+            const bucket = buckets.get(timestamp);
+            if (bucket) {
 
+                bucket.temperatureC += temperatureC;
+                bucket.humidity += humidity;
+                bucket.gas += gas;
+                bucket.readingsCount++;
+
+            } else buckets.set(timestamp, { ...SENSOR_CHART_BUCKET_TEMPLATE });
+            
         }
-        for(let timestampStr in buckets) {
+        for (let [
+            timestamp,
+            { temperatureC, humidity, gas, readingsCount }
+        ] of buckets) {
 
-            const timestamp = Number(timestampStr);
-            const bucket = buckets[timestamp];
-            const { length } = bucket;
-            const readingSums = bucket.reduce(
-                (array, { temperatureC, humidity, gas }) => {
-                    array[0] += temperatureC;
-                    array[1] += humidity;
-                    array[2] += gas
-                    return array;
-                }, [0, 0, 0]
-            );
-            const [temperatureC, humidity, gas] = readingSums.map(sum => sum / length);
+            temperatureC /= readingsCount;
+            humidity /= readingsCount;
+            gas /= readingsCount;
             sensorChartPoints.push({ timestamp, temperatureC, humidity, gas });
 
         }
-        
-        setSensorChartPoints(sensorChartPoints);
+        for (
+            let timestamp = endDateMs - (tickIntervalMs * tickGapsCount);
+            timestamp <= endDateMs;
+            timestamp += tickIntervalMs
+        ) sensorChartAxisTicks.push(timestamp);
+        return [sensorChartPoints, sensorChartAxisTicks, sensorChartRange];
 
-        // handleUpdateAxisTicks(intervalMs, offsetMs);
+    }, [sensorReadings, active]);
 
-    }, [sensorReadings, points, active]);
+    useEffect(() => {
 
-    return [sensorChartPoints, sensorChartAxisTicks];
+        oldSensorChartPointsRef.current = sensorChartPoints;
+        oldSensorAxisTicksRef.current = sensorChartAxisTicks;
+        oldSensorChartRangeRef.current = sensorChartRange;
 
-    // const [sensorChartData, setSensorChartData] = useState<SensorChartData>([]);
-    // const [xTicks, setXTicks] = useState<AxisTick[]>([]);
-    // const [generalSafetyLevel, setGeneralSafetyLevel] = useState<GeneralSafetyLevelProps>(
-    //     GENERAL_SAFETY_LEVELS[0]
-    // );
+    }, [sensorChartPoints, sensorChartAxisTicks, sensorChartRange]);
 
-    // useEffect(() => {(async() => {
-
-    //     if(!active) return;
-
-    //     const readingsList = await SensorApi.getReadings(startDate, endDate);
-    //     const [temperatureReadings, humidityReadings, gasReadings] = readingsList;
-    //     const [
-    //         temperatureTimestamps, humidityTimestamps, gasTimestamps
-    //     ]: number[][] = readingsList.map(readings => readings.map(
-    //         ({createdAt}) => createdAt.getTime()
-    //     ));
-    //     let [
-    //         temperatureTimestampIndex, humidityTimestampIndex, gasTimestampIndex
-    //     ]: number[] = [0, 0, 0];
-    //     const totalMinutes = differenceInMinutes(endDate, startDate);
-    //     const [_, [tickMinInterval, pointMinInterval]] = Object.entries(TICK_POINT_MIN_INTERVAL_MAP)
-    //         .find(
-    //             ([treshold])=>(totalMinutes <= +treshold)
-    //         )!;
-    //     const offsetMin: number = startDate.getMinutes();
-    //     const chartDataMap = new Map<string, SensorChartDataPoint>();
-    //     const xTicksNew: AxisTick[] = [];
-    //     startDate.setTime(bucketMsToMin(
-    //         startDate.getTime(), pointMinInterval, offsetMin
-    //     ));
-    //     endDate.setTime(bucketMsToMin(
-    //         endDate.getTime(), pointMinInterval, offsetMin
-    //     ));
-    //     let pointStartDate = new Date(startDate);
-    //     let tickStartDate = new Date(startDate);
-
-    //     while (tickStartDate <= endDate) {
-    //         const timestamp: number = tickStartDate.getTime();
-    //         xTicksNew.push(timestamp);
-    //         tickStartDate = addMinutes(tickStartDate, +tickMinInterval);
-    //     }
-    //     while (pointStartDate <= endDate) {
-    //         const timestamp: number = pointStartDate.getTime();
-    //         if(temperatureTimestamps[temperatureTimestampIndex + 1] <= timestamp)
-    //             temperatureTimestampIndex++;
-    //         if(humidityTimestamps[humidityTimestampIndex + 1] <= timestamp)
-    //             humidityTimestampIndex++;
-    //         if(gasTimestamps[gasTimestampIndex + 1] <= timestamp)
-    //             gasTimestampIndex++;
-    //         addChartPoint(chartDataMap, new Date(timestamp), {
-    //             temperatureC: readingsList[0][temperatureTimestampIndex].value,
-    //             humidity: readingsList[1][humidityTimestampIndex].value,
-    //             gas: readingsList[2][gasTimestampIndex].value
-    //         });
-    //         pointStartDate = addMinutes(pointStartDate, pointMinInterval);
-    //     }
-
-    //     setSensorChartData(Array.from(chartDataMap.values()));
-    //     setXTicks(xTicksNew);
-    //     setGeneralSafetyLevel(SafetyLevel.getGeneralSafetyLevel(
-    //         temperatureReadings[temperatureReadings.length - 1].value,
-    //         humidityReadings[humidityReadings.length - 1].value,
-    //         gasReadings[gasReadings.length - 1].value
-    //     ));
-
-    // })()}, [endDate, active]);
-
-    // return [sensorChartData, xTicks, generalSafetyLevel];
+    return [sensorChartPoints, sensorChartAxisTicks, sensorChartRange];
 
 }
 
-// function addChartPoint(
-//     dataMap: Map<string, SensorChartDataPoint>,
-//     date: Date,
-//     updates: Partial<SensorChartDataPoint>
-// ): void {
-//     const timestamp: number = date.getTime();
-//     const timestampString = String(timestamp);
-//     if (dataMap.has(String(timestampString))) {
-//         const existing = dataMap.get(timestampString)!;
-//         if (updates.temperatureC === null) delete updates['temperatureC'];
-//         if (updates.humidity === null) delete updates['humidity'];
-//         if (updates.gas === null) delete updates['gas'];
-//         Object.assign(existing, updates);
-//     } else dataMap.set(timestampString, {
-//         timestamp, temperatureC: null, humidity: null, gas: null, ...updates
-//     });
-// }
+export function getSensorChartRange(
+    dateRange: DateRange
+): SensorChartRange {
+
+    const difference = dateRange.endDate.getTime() - dateRange.startDate.getTime();
+    for (let sensorChartRange of SENSOR_CHART_RANGES)
+        if (difference <= sensorChartRange.rangeMs)
+            return sensorChartRange;
+    throw new Error(`Date range is far too large for the chart`);
+
+}

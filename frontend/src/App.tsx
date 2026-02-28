@@ -52,10 +52,9 @@ export default function App() {
         connectedToApi
     );
     const sensorReadings = useSensorReadings(api, dateRange, connectedToApi);
-    const [sensorChartPoints, sensorChartAxisTicks] = useSensorChartData(
+    const [sensorChartPoints, sensorChartAxisTicks, sensorChartRange] = useSensorChartData(
         sensorReadings,
         dateRange,
-        envMap.VITE_CHART_POINTS_COUNT,
         connectedToApi
     );
     const appContext = useMemo<AppContextProps>(() => ({
