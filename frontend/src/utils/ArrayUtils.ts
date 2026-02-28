@@ -5,25 +5,25 @@ export class ArrayUtils {
     public static binarySearchIndex<T>(
         array: T[],
         target: T,
-        compare: ArrayItemCompareFunc<T>
+        compare: ArrayItemCompareFunc<T>,
+        startIndex: number = 0,
+        endIndex: number = array.length - 1
     ): number {
 
         if (array.length === 0) return 0;
-        let start = 0;
-	    let end = array.length - 1;
 
-        while (start !== end) {
+        while (startIndex !== endIndex) {
 		
-            const next = Math.floor((start + end) / 2);
-            const comparison = compare(target, array[next]);
-            if (comparison <= next)
-                end = next;
+            const nextIndex = Math.floor((startIndex + endIndex) / 2);
+            const comparison = compare(target, array[nextIndex]);
+            if (comparison <= nextIndex)
+                endIndex = nextIndex;
             else
-                start = next + 1;
+                startIndex = nextIndex + 1;
 
         }
 
-        return start;
+        return startIndex;
 
     }
 

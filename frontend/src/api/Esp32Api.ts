@@ -1,6 +1,10 @@
 import axios, { AxiosInstance } from "axios";
 import { BooleanUtils } from "../utils/BooleanUtils";
 import { formatISO } from "date-fns";
+import {
+    IPV4_REGEX,
+    PORT_REGEX
+} from "../constants/ip";
 
 export class Esp32Api {
 
@@ -11,8 +15,10 @@ export class Esp32Api {
         private readonly port: string
     ) {
 
-        this.host = host;
-        this.port = port;
+        if (!IPV4_REGEX.test(host))
+            throw new Error(`Parameter host must be a valid IPv4 address`);
+        if (!PORT_REGEX.test(port))
+            throw new Error(`Parameter port must be an integer between 0 to 65535.`)
         this.client = axios.create({
             baseURL: this.baseUrl,
             headers: { "Content-Type": "application/json" }

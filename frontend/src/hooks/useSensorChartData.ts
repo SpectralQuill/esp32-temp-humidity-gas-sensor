@@ -88,7 +88,7 @@ export function useSensorChartData(
             sensorChartPoints.push({ timestamp, temperatureC, humidity, gas });
 
         }
-
+        
         setSensorChartPoints(sensorChartPoints);
 
         // handleUpdateAxisTicks(intervalMs, offsetMs);
