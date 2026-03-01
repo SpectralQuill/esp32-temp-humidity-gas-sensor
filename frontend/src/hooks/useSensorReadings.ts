@@ -1,7 +1,7 @@
 import { addMilliseconds } from "date-fns";
 import { ArrayUtils } from "../utils/ArrayUtils";
 import { DateRange } from "../utils/DateRange";
-import { Esp32Api } from "../api/Esp32Api";
+import { Esp32Api } from "../services/Esp32Api";
 import {
     useEffect,
     useRef,

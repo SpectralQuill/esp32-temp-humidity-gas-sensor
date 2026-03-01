@@ -108,13 +108,13 @@ export class Esp32KyselyClient {
             .createTable(Esp32DatabaseTableNames.SafetyLevels)
             .ifNotExists()
             .addColumn("readingType", "text", col => col.notNull())
-            .addColumn("label", "text", col => col.notNull())
             .addColumn("threshold", "real", col => col.notNull())
+            .addColumn("label", "text", col => col.notNull())
             .addColumn("color", "text", col => col.notNull())
             .addColumn("level", "text", col => col.notNull())
             .addPrimaryKeyConstraint(
                 "pk_safety_levels",
-                ["readingType", "label"]
+                ["readingType", "threshold"]
             )
             .addCheckConstraint(
                 "threshold_precision",
@@ -141,7 +141,7 @@ export class Esp32KyselyClient {
                 .insertInto(Esp32DatabaseTableNames.SafetyLevels)
                 .values(row)
                 .onConflict(onConflict =>
-                    onConflict.columns(["readingType", "label"]).doUpdateSet({
+                    onConflict.columns(["readingType", "threshold"]).doUpdateSet({
                         threshold: row.threshold,
                         color: row.color,
                         level: row.level

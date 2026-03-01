@@ -177,12 +177,26 @@ export class Esp32SqliteService {
         return row?.createdAt ? new Date(row.createdAt) : null;
 
     }
+
+    public async getSafetyLevels(
+        readingType: SafetyLevelReadingType
+    ): Promise<SafetyLevel[]> {
+        
+        return await this.database
+            .selectFrom(Esp32DatabaseTableNames.SafetyLevels)
+            .selectAll()
+            .where("readingType", "==", readingType)
+            .orderBy("threshold", "asc")
+            .execute()
+        ;
+
+    }
     
     public async deleteReadings(
         startDate: Date,
         endDate: Date,
-        excludeStartDate = false,
-        excludeEndDate = false
+        excludeStartDate: boolean = false,
+        excludeEndDate: boolean = false
     ): Promise<SensorReading[]> {
         
         let query = this.database

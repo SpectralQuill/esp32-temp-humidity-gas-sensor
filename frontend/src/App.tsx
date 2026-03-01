@@ -2,7 +2,7 @@ import { AppContext, AppContextProps } from "./contexts/AppContext";
 // import { DangerPopup } from "./components/DangerPopup";
 // import { Dashboard } from "./components/Dashboard";
 import { EnvUtils } from "./utils/EnvUtils";
-import { Esp32Api } from "./api/Esp32Api";
+import { Esp32Api } from "./services/Esp32Api";
 import { ESP32_FRONTEND_ENV_SCHEMA_DATA } from "./constants/envData";
 import { format as formatDate } from "date-fns";
 import {

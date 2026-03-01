@@ -29,6 +29,10 @@ interface DateRangeDto {
     excludeEndDate?: BooleanString;
 }
 
+interface GetSafetyLevelsDto {
+    readingType: SafetyLevelReadingType
+}
+
 /*  =========================
     API RESPONSES
     ========================= */
