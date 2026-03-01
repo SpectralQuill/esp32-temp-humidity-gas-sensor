@@ -77,7 +77,7 @@ export class Esp32SqliteService {
         
         const formattedDate = formatDate(createdAt, DATE_FORMAT);
         console.log(
-            `✅ Creating reading at ${formattedDate} - Temp: ${
+            `✅ Created reading at ${formattedDate} - Temp: ${
             temperatureC}°C, Humidity: ${humidity}, Gas: ${gas}`
         );
         

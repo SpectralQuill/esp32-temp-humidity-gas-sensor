@@ -1,18 +1,11 @@
-import { SafetyLevel } from "../utils/SafetyLevel";
 import { SensorChart } from "./SensorChart";
 
 import "../style/Dashboard.scss";
 
-const {
-    TEMPERATURE_C_REFERENCE_LINES,
-    HUMIDITY_REFERENCE_LINES,
-    GAS_REFERENCE_LINES
-} = SafetyLevel;
-
 export function Dashboard() {
 
     const formatPercentageValue = (value?: number | null) =>
-        (value != null) ? value.toFixed(0) : '--'
+        (value != null) ? (value * 100).toFixed(0) : '--'
     ;
     const formatTemperatureCValue = (value?: number | null) =>
         (value != null) ? value.toFixed(1) : '--'
@@ -21,10 +14,9 @@ export function Dashboard() {
     return <>
         <main>
             <SensorChart
-                color="#ff7300"
-                dataKey="temperatureC"
-                readingTypeLabel="Temperature"
-                referenceLines={TEMPERATURE_C_REFERENCE_LINES}
+                color="ff7300"
+                readingType="temperatureC"
+                name="Temperature"
                 unit="°C"
                 yAxisDomain={[
                     (dataMin: number) => Math.min(0, dataMin + 1),
@@ -33,23 +25,22 @@ export function Dashboard() {
                 formatReadingValue={formatTemperatureCValue}
             />
             <SensorChart
-                color="#0088ff"
-                dataKey="humidity"
-                readingTypeLabel="Humidity"
-                referenceLines={HUMIDITY_REFERENCE_LINES}
+                color="0088ff"
+                readingType="humidity"
+                name="Humidity"
                 unit="%"
-                yAxisDomain={[0, 100]}
+                yAxisDomain={[0, 1]}
                 formatReadingValue={formatPercentageValue}
             />
             <SensorChart
-                color="#00cc88"
-                dataKey="gas"
-                readingTypeLabel="Gas"
-                referenceLines={GAS_REFERENCE_LINES}
+                color="00cc88"
+                readingType="gas"
+                name="Gas"
                 unit="%"
-                yAxisDomain={[0, 100]}
+                yAxisDomain={[0, 1]}
                 formatReadingValue={formatPercentageValue}
             />
         </main>
     </>;
+    
 }

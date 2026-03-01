@@ -1,5 +1,5 @@
 import { ConnectionInformant } from "./ConnectionInformant";
-import { MinuteRangeSelection } from "./MinuteRangeSelection";
+import { GraphRangeSelection } from "./GraphRangeSelection";
 import { SafetyLevelInformant } from "./SafetyLevelInformant";
 
 import "../style/Header.scss";
@@ -11,7 +11,7 @@ export function Header() {
             <h1 className="font-large">ESP32 Sensor Dashboard</h1>
             <SafetyLevelInformant />
             <ConnectionInformant />
-            <MinuteRangeSelection />
+            <GraphRangeSelection />
         </header>
     </>;
 

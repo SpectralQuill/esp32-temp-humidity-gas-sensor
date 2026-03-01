@@ -68,10 +68,10 @@ function PopupCloseButton() {
 
     const handleClick = (): void => setIsVisible(false);
 
-    return (
+    return <>
         <button className="popup-close-button font-large" onClick={handleClick}>
             <FontAwesomeIcon icon={faX} />
         </button>
-    );
+    </>;
     
 }

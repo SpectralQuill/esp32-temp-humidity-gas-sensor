@@ -16,7 +16,7 @@ export function useSensorReadings(
 
     const [sensorReadings, setSensorReadings] = useState<SensorReading[]>([]);
     const oldDateRangeRef = useRef<DateRange | null>(null);
-    const requestIdRef = useRef<number>(0);
+    const requestIdRef = useRef<number>(1);
 
     useEffect(() => {
 

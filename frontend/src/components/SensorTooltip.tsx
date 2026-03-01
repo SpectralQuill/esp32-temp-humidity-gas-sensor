@@ -47,7 +47,7 @@ export function SensorTooltip({
         label: generalSafetyLevelLabel
     } = GENERAL_SAFETY_LEVELS[generalSafetyLevelIndex];
 
-    return (
+    return <>
         <div className="sensor-tooltip">
             <ul className="no-list-style">
                 <li style={{color: '#888'}}>
@@ -64,5 +64,6 @@ export function SensorTooltip({
                 </li>
             </ul>
         </div>
-    );
+    </>;
+    
 }
