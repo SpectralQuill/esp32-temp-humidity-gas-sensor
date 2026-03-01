@@ -40,7 +40,7 @@ interface ApiHealth {
     database: string;
     databaseStatus: "reachable" | "unreachable";
     uptime: number;
-    sampleReadingExists: boolean;
+    sampleReadingExists: boolean
 }
 
 interface MessageResponse {

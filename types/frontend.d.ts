@@ -2,7 +2,7 @@
     RECHARTS
     ========================= */
 
-interface SensorReadingChartPoint {
+interface SensorChartPoint {
     timestamp: number;
     temperatureC: number;
     humidity: number;

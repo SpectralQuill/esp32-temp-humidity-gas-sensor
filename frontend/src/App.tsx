@@ -1,27 +1,93 @@
 import { AppContext, AppContextProps } from "./contexts/AppContext";
-import { DangerPopup } from "./components/DangerPopup";
-import { Dashboard } from "./components/Dashboard";
-import { Header } from "./components/Header";
-// import { SensorApi } from "./api/SensorApi";
-import { StartupPopup } from "./components/StartupPopup";
-import { useConnection } from "./hooks/useConnection";
-import { useDateRangeRefresher } from "./hooks/useDateRangeRefresher";
-import { useState } from "react";
+// import { DangerPopup } from "./components/DangerPopup";
+// import { Dashboard } from "./components/Dashboard";
+import { EnvUtils } from "./utils/EnvUtils";
+import { Esp32Api } from "./api/Esp32Api";
+import { ESP32_FRONTEND_ENV_SCHEMA_DATA } from "./constants/envData";
+import { format as formatDate } from "date-fns";
+import {
+    Fragment,
+    useRef,
+    useState
+} from "react";
+// import { Header } from "./components/Header";
+// import { StartupPopup } from "./components/StartupPopup";
+import {
+    useCallback,
+    useMemo
+} from "react";
+import { useConnectionRetry } from "./hooks/useConnectionRetry";
+import { useSlidingDateRange } from "./hooks/useSlidingDateRange";
 import { useSensorChartData } from "./hooks/useSensorChartData";
-import { VariableLogger } from "./components/VariableLogger";
+import { useSensorReadings } from "./hooks/useSensorReadings";
+// import { VariableLogger } from "./components/VariableLogger";
 
 import "./style/App.scss";
 
-const DEFAULT_GRAPH_RANGE_BEFORE_MIN = 5;
-const DATABASE_CONNECTION_SIMULATIONS_COUNT = undefined;
-const CONNECTION_INTERVAL_MS: number = 1000;
-const SENSOR_GRAPHS_REFRESH_INTERVAL_MS = 5000;
+const DEFAULT_GRAPH_RANGE_MIN = 5;
 
-const api = import.meta.env.VITE_API_HOST;
+export default function App() {
 
-function App() {
+    const { current: envMap } = useRef(
+        EnvUtils.ensureEnv(ESP32_FRONTEND_ENV_SCHEMA_DATA)
+    );
+    const { current: api } = useRef(new Esp32Api(
+        envMap.VITE_API_HOST,
+        envMap.VITE_API_PORT
+    ));
+    const connect = useCallback(() => api.checkConnection(), [api]);
 
-    return <h1>{api}</h1>
+    const [connectedToApi, connectingToApi] = useConnectionRetry(
+        connect,
+        envMap.VITE_API_RETRY_INTERVAL_MS,
+        envMap.VITE_API_MAX_RETRY_COUNT,
+        envMap.VITE_API_CONNECTION_IS_SIMULATED
+    );
+    const [graphRangeMin, setGraphRangeMin] = useState<number>(
+        DEFAULT_GRAPH_RANGE_MIN
+    );
+    const dateRange = useSlidingDateRange(
+        envMap.VITE_CHART_REFRESH_INTERVAL_MS,
+        graphRangeMin,
+        connectedToApi
+    );
+    const sensorReadings = useSensorReadings(api, dateRange, connectedToApi);
+    const [sensorChartPoints, sensorChartAxisTicks, sensorChartRange] = useSensorChartData(
+        sensorReadings,
+        dateRange,
+        connectedToApi
+    );
+    const appContext = useMemo<AppContextProps>(() => ({
+        connectedToApi, connectingToApi,
+        graphRangeMin, setGraphRangeMin,
+        sensorChartPoints, sensorChartAxisTicks
+    }), [
+        connectedToApi, connectingToApi, graphRangeMin, sensorChartPoints,
+        sensorChartAxisTicks
+    ]);
+
+    return <AppContext.Provider value={appContext}>
+        <table>
+            <thead><tr>
+                <td>Created at</td>
+                <td>Temp</td>
+                <td>Humidity</td>
+                <td>Gas</td>
+            </tr></thead>
+            <tbody>
+                {
+                    sensorReadings.map((reading, index) => <Fragment key={index}>
+                        <tr>
+                            <td>{formatDate(reading.createdAt, "yyyy-MM-dd HH:mm:ss")}</td>
+                            <td>{reading.temperatureC}</td>
+                            <td>{reading.humidity}</td>
+                            <td>{reading.gas}</td>
+                        </tr>
+                    </Fragment>)
+                }
+            </tbody>
+        </table>
+    </AppContext.Provider>;
 
     // const [graphRangeMin, setGraphRangeMin] = useState<number>(
     //     DEFAULT_GRAPH_RANGE_BEFORE_MIN
@@ -31,7 +97,7 @@ function App() {
     //     CONNECTION_INTERVAL_MS,
     //     DATABASE_CONNECTION_SIMULATIONS_COUNT
     // );
-    // const [startDate, endDate] = useDateRangeRefresher(
+    // const [startDate, endDate] = useSlidingDateRange(
     //     SENSOR_GRAPHS_REFRESH_INTERVAL_MS, graphRangeMin, isConnectedToDatabase
     // );
     // const [sensorChartData, sensorChartXTicks, generalSafetyLevel] = useSensorChartData(
@@ -65,5 +131,3 @@ function App() {
     //     </AppContext.Provider>
     // );
 }
-
-export default App;

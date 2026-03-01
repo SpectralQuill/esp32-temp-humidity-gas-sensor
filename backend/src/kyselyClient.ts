@@ -48,6 +48,8 @@ export class Esp32KyselyClient {
         await this.setSafetyLevelsSchema(database);
         await this.ensureSafetyLevelsSeed(database);
 
+        this.database = database;
+
         console.log("✅ Database initialized successfully.");
 
     }

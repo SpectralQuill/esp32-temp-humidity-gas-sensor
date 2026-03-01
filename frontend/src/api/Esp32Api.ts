@@ -1,29 +1,63 @@
 import axios, { AxiosInstance } from "axios";
 import { BooleanUtils } from "../utils/BooleanUtils";
 import { formatISO } from "date-fns";
-
-const { VITE_API_HOST, VITE_API_PORT } = import.meta.env;
-if (!VITE_API_HOST || !VITE_API_PORT)
-    throw new Error(
-        "VITE_API_HOST and VITE_API_PORT must be defined in Vite environment variables"
-    );
+import {
+    IPV4_REGEX,
+    PORT_REGEX
+} from "../constants/ipData";
 
 export class Esp32Api {
 
-    private static readonly baseUrl: string = `http://${VITE_API_HOST}:${VITE_API_PORT}`;
+    private readonly client: AxiosInstance;
 
-    private static readonly client: AxiosInstance = axios.create({
-        baseURL: Esp32Api.baseUrl,
-        headers: { "Content-Type": "application/json" }
-    });
+    public constructor(
+        private readonly host: string,
+        private readonly port: string
+    ) {
+
+        if (!IPV4_REGEX.test(host))
+            throw new Error(`Parameter host must be a valid IPv4 address`);
+        if (!PORT_REGEX.test(port))
+            throw new Error(`Parameter port must be an integer between 0 to 65535.`)
+        this.client = axios.create({
+            baseURL: this.baseUrl,
+            headers: { "Content-Type": "application/json" }
+        });
+
+    }
+
+    private get baseUrl(): string {
+
+        const { host, port } = this;
+        return `http://${host}:${port}`;
+
+    }
+
+    public async checkConnection(): Promise<boolean> {
+
+        try {
+
+            const { status, databaseStatus } = await this.getHealth();
+            const isHealthy = (status === "healthy") && (databaseStatus === "reachable");
+            if (!isHealthy) throw new Error();
+            return isHealthy;
+
+        } catch (error) {
+
+            console.error(`❌ Failed to connect to API`);
+            return false;
+
+        }
+
+    }
     
     /* =========================
     HEALTH
     ========================= */
     
-    public static async getHealth(): Promise<ApiHealth> {
+    public async getHealth(): Promise<ApiHealth> {
 
-        const { data } = await Esp32Api.client.get<ApiHealth>("/health");
+        const { data } = await this.client.get<ApiHealth>("/health");
         return data;
 
     }
@@ -32,20 +66,31 @@ export class Esp32Api {
     GET READINGS
     ========================= */
     
-    public static async getReadings(
+    public async getReadings(
         startDate: Date | null,
         endDate: Date | null,
         excludeStartDate: boolean | null = false,
         excludeEndDate: boolean | null = false
     ): Promise<SensorReading[]> {
 
-        const params: DateRangeDto = Esp32Api.setDateRangeParams(
+        const params: DateRangeDto = this.setDateRangeParams(
             {}, startDate, endDate, excludeStartDate, excludeEndDate
         );
-        const response = await Esp32Api.client.get<SensorReading[]>(
-            "/api/readings", { params }
-        );
-        return response.data;
+        try {
+
+            const { data } = await this.client.get<SensorReading[]>(
+                "/api/readings", { params }
+            );
+            data.forEach(reading => reading.createdAt = new Date(reading.createdAt));
+            return data;
+
+        } catch(error) {
+
+            console.error(`❌ Failed to fetch readings`)
+            return [];
+
+        }
+        
 
     }
     
@@ -53,17 +98,17 @@ export class Esp32Api {
     DELETE READINGS
     ========================= */
     
-    public static async deleteReadings(
+    public async deleteReadings(
         startDate: Date,
         endDate: Date,
         excludeStartDate: boolean | null,
         excludeEndDate: boolean | null
     ): Promise<SensorReading[]> {
 
-        const params: DateRangeDto = Esp32Api.setDateRangeParams(
+        const params: DateRangeDto = this.setDateRangeParams(
             {}, startDate, endDate, excludeStartDate, excludeEndDate
         );
-        const { data } = await Esp32Api.client.delete(
+        const { data } = await this.client.delete(
             "/api/readings", { params }
         );
         return data;
@@ -74,9 +119,9 @@ export class Esp32Api {
     RESET DATABASE
     ========================= */
     
-    public static async resetDatabase(): Promise<MessageResponse> {
+    public async resetDatabase(): Promise<MessageResponse> {
 
-        const { data } = await Esp32Api.client.delete("/api/reset");
+        const { data } = await this.client.delete("/api/reset");
         return data;
 
     }
@@ -84,7 +129,7 @@ export class Esp32Api {
     /* =========================
     HELPERS
     ========================= */
-    private static setDateRangeParams<T extends DateRangeDto>(
+    private setDateRangeParams<T extends DateRangeDto>(
         params: T,
         startDate: Date | null,
         endDate: Date | null,

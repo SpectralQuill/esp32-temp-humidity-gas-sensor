@@ -3,11 +3,15 @@
 Submitted by: Gian Tristian G. Apostol
 Course: Architecture and Organization (Computer Studies)
 
-Project Background
+# Project Background
 Frontend: Vite + React + TypeScript
-Backend: Prisma
-Database: PostgreSQL in Docker
+Backend: CORS + Kysely
+Database: SQLite
 
-Requirements - Node - Docker
+# Requirements
+- Node
 
-Setup and Running 1. Run "npm run init". 2.
+# Setup and Running
+1. Run "npm run init".
+2. Duplicate "/.env.example" as "/.env".
+3. Fill up environmental variables.

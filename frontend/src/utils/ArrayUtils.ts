@@ -1,13 +1,40 @@
+export type ArrayItemCompareFunc<T> = (a: T, b: T) => number;
+
 export class ArrayUtils {
 
-    static clearArray<T>(array: T[]): T[] {
+    public static binarySearchIndex<T>(
+        array: T[],
+        target: T,
+        compare: ArrayItemCompareFunc<T>,
+        startIndex: number = 0,
+        endIndex: number = array.length - 1
+    ): number {
+
+        if (array.length === 0) return 0;
+
+        while (startIndex !== endIndex) {
+		
+            const nextIndex = Math.floor((startIndex + endIndex) / 2);
+            const comparison = compare(target, array[nextIndex]);
+            if (comparison <= nextIndex)
+                endIndex = nextIndex;
+            else
+                startIndex = nextIndex + 1;
+
+        }
+
+        return startIndex;
+
+    }
+
+    public static clearArray<T>(array: T[]): T[] {
 
         array.splice(0, array.length)
         return array;
 
     }
     
-    static filterNotUndefined<T>(array: (T | undefined)[]): T[] {
+    public static filterNotUndefined<T>(array: (T | undefined)[]): T[] {
         return array.filter((item: T | undefined) => item !== undefined);
     }
 
