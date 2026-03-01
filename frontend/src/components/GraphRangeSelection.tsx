@@ -1,16 +1,16 @@
 import { AppContext } from "../contexts/AppContext";
 import { ChangeEvent } from "react";
 import { Fragment } from "react";
-import { TICK_POINT_MIN_INTERVAL_MAP } from "../constants/tickPointMinIntervalMap";
+import { SENSOR_CHART_RANGES } from "../constants/sensorChartRangesData";
 import { useContext } from "react";
 
-export function MinuteRangeSelection() {
+export function GraphRangeSelection() {
 
-    const { graphRangeMin, setGraphRangeMin } = useContext(AppContext);
+    const { graphRangeMs, setGraphRangeMs } = useContext(AppContext);
 
     const handleChange = (event: ChangeEvent<HTMLSelectElement>) => {
         const value: number = +event.target.value;
-        setGraphRangeMin(value);
+        setGraphRangeMs(value);
     };
 
     return <>
@@ -18,12 +18,12 @@ export function MinuteRangeSelection() {
             <select
                 id="graph-range"
                 className="font-medium"
-                value={graphRangeMin}
+                value={graphRangeMs}
                 onChange={handleChange}
             >
-                {Object.entries(TICK_POINT_MIN_INTERVAL_MAP).map(
-                    ([value, [_1, _2, label]]) => <Fragment key={value}>
-                        <option value={+value}>{ label }</option>
+                {SENSOR_CHART_RANGES.map(
+                    ({ label, rangeMs }) => <Fragment key={rangeMs}>
+                        <option value={rangeMs}>{ label }</option>
                     </Fragment>
                 )}
             </select>

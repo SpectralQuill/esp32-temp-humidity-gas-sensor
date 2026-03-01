@@ -5,6 +5,8 @@ import cors from "cors";
 import { Esp32SqliteService } from "./sqliteService";
 import express from "express";
 import { IpAddressUtils } from "../utils/IpAddressUtils";
+import { Request } from "express";
+import { SAFETY_LEVEL_READING_TYPES } from "./safetyLevels";
 
 const app = express();
 const sqliteService = new Esp32SqliteService();
@@ -49,7 +51,7 @@ app.get("/health", async (_req, res) => {
 });
 
 /* =======================
-CREATE SINGLE ROW
+CREATE SINGLE READING
 ======================= */
 app.post("/api/reading", async (req, res) => {
 
@@ -163,6 +165,38 @@ app.get("/api/readings/min-created-at", async (_req, res) => {
 });
 
 /* =======================
+GET SAFETY LEVELS BY READING TYPE
+======================= */
+app.get(
+    "/api/safety-levels/:readingType",
+    async (req: Request<GetSafetyLevelsDto>, res) => {
+
+        try {
+
+            const { readingType } = req.params;
+            const readingTypes = Object.values(
+                SAFETY_LEVEL_READING_TYPES
+            ) as SafetyLevelReadingType[];
+            if (!readingType || !readingTypes.includes(readingType))
+                return res.status(400).json({
+                    error: "Invalid readingType"
+                });
+            
+            const safetyLevels = await sqliteService.getSafetyLevels(readingType);
+            
+            res.status(200).json(safetyLevels);
+
+        } catch (error) {
+
+            console.error("Error getting safety levels:", error);
+            res.status(500).json({ error: "Failed to get safety levels" });
+
+        }
+
+    }
+);
+
+/* =======================
 DELETE READINGS
 ======================= */
 app.delete("/api/readings", async (req, res) => {
@@ -251,6 +285,7 @@ app.listen(API_PORT, API_HOST, () => {
   GET    /api/readings
   GET    /api/readings/max-created-at
   GET    /api/readings/min-created-at
+  GET    /api/safety-levels/:readingType
 
   DELETE /api/readings
   DELETE /api/reset

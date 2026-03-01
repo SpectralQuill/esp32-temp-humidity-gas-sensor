@@ -32,3 +32,10 @@ export const SAFETY_LEVELS_SEED_DATA = [
     { readingType: "general", label: "Warning", threshold: 1, color: "ff9800", level: "Warning" },
     { readingType: "general", label: "Danger", threshold: 2, color: "8b0000", level: "Danger" }
 ] as const satisfies ReadonlyArray<SafetyLevel>;
+
+export enum SAFETY_LEVEL_READING_TYPES {
+    TemperatureC = "temperatureC",
+    Humidity = "humidity",
+    Gas = "gas",
+    General = "general"
+}

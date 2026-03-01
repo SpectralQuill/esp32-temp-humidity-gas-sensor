@@ -1,5 +1,5 @@
 import { DateRange } from "../utils/DateRange";
-import { subMinutes } from "date-fns";
+import { subMilliseconds } from "date-fns";
 import {
     useEffect,
     useState
@@ -7,12 +7,12 @@ import {
 
 export function useSlidingDateRange(
     refreshIntervalMs: number,
-    durationMin: number,
+    rangeMs: number,
     active: boolean
 ): DateRange {
 
     const [dateRange, setDateRange] = useState<DateRange>(
-        () => getCurrentDateRange(durationMin)
+        () => getCurrentDateRange(rangeMs)
     );
 
     useEffect(() => {
@@ -21,22 +21,22 @@ export function useSlidingDateRange(
         let cancelled = false;
         const handleUpdate = () => {
             if (cancelled) return;
-            setDateRange(getCurrentDateRange(durationMin));
+            setDateRange(getCurrentDateRange(rangeMs));
             setTimeout(handleUpdate, refreshIntervalMs);
         };
         handleUpdate();
         return () => { cancelled = true; };
 
-    }, [refreshIntervalMs, durationMin, active]);
+    }, [refreshIntervalMs, rangeMs, active]);
 
     return dateRange;
 
 }
 
-export function getCurrentDateRange(durationMin: number): DateRange {
+export function getCurrentDateRange(rangeMs: number): DateRange {
 
     const now = new Date();
-    const past = subMinutes(now, durationMin);
+    const past = subMilliseconds(now, rangeMs);
     return new DateRange(past, now);
 
 }

@@ -15,7 +15,7 @@ export type SensortChartBucket = {
     temperatureC: number;
     humidity: number;
     gas: number;
-    readingsCount: 0;
+    readingsCount: number;
 };
 
 export const SENSOR_CHART_BUCKET_TEMPLATE = {
@@ -68,15 +68,13 @@ export function useSensorChartData(
         for (const { createdAt, temperatureC, humidity, gas } of sensorReadings) {
 
             const timestamp = DateUtils.bucket(createdAt, pointIntervalMs, pointOffsetMs);
-            const bucket = buckets.get(timestamp);
-            if (bucket) {
-
-                bucket.temperatureC += temperatureC;
-                bucket.humidity += humidity;
-                bucket.gas += gas;
-                bucket.readingsCount++;
-
-            } else buckets.set(timestamp, { ...SENSOR_CHART_BUCKET_TEMPLATE });
+            if (!buckets.has(timestamp))
+                buckets.set(timestamp, { ...SENSOR_CHART_BUCKET_TEMPLATE });
+            const bucket = buckets.get(timestamp)!;
+            bucket.temperatureC += temperatureC;
+            bucket.humidity += humidity;
+            bucket.gas += gas;
+            bucket.readingsCount++;
             
         }
         for (let [
@@ -119,6 +117,6 @@ export function getSensorChartRange(
     for (let sensorChartRange of SENSOR_CHART_RANGES)
         if (difference <= sensorChartRange.rangeMs)
             return sensorChartRange;
-    throw new Error(`Date range is far too large for the chart`);
+    throw new Error(`Date range of ${difference}ms is far too large for the chart`);
 
 }

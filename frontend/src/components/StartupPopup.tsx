@@ -12,19 +12,19 @@ const POPUP_CLOSE_TIMEOUT_MS: number = 1000;
 
 export function StartupPopup() {
 
-    const { isConnectedToDatabase } = useContext(AppContext);
+    const { connectedToApi } = useContext(AppContext);
     const [isVisible, setIsVisible] = useState(true);
     const loadingText = useLoadingText();
 
     useEffect(() => {
-        if (!isConnectedToDatabase) return;
+        if (!connectedToApi) return;
         const timeoutId = setTimeout(() => setIsVisible(false), POPUP_CLOSE_TIMEOUT_MS);
         return () => clearTimeout(timeoutId);
-    }, [isConnectedToDatabase]);
+    }, [connectedToApi]);
 
     if (!isVisible) return <></>;
 
-    return (
+    return <>
         <Popup
             className="startup-popup"
             visible={isVisible}
@@ -34,13 +34,14 @@ export function StartupPopup() {
             <ul className="progress no-list-style font-medium">
                 <li>
                     <FontAwesomeIcon icon={
-                        isConnectedToDatabase ? faSolidCircleCheck : faRegularCircleCheck
+                        connectedToApi ? faSolidCircleCheck : faRegularCircleCheck
                     } />
-                    {isConnectedToDatabase ? "Connected" : "Connecting"}
+                    {connectedToApi ? "Connected" : "Connecting"}
                     <> to database</>
-                    {isConnectedToDatabase || loadingText}
+                    {connectedToApi || loadingText}
                 </li>
             </ul>
         </Popup>
-    );
+    </>;
+    
 }

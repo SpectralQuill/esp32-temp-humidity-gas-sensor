@@ -3,29 +3,30 @@ import { useContext } from "react";
 
 import "../style/SensorChart.scss";
 
-export interface SensorChartProps {
+export interface SensorCardProps {
     color: string;
-    dataKey: SensorReadingType;
-    readingTypeLabel: string;
+    name: string;
+    readingType: SensorReadingType;
     unit: string;
-    formatReadingValue(value?: number): string;
+    formatReadingValue(value?: number | null): string;
 }
 
-export function SensorCard(props: SensorChartProps) {
+export function SensorCard(props: SensorCardProps) {
 
     const {
-        color, dataKey, readingTypeLabel, unit,
+        color, readingType, name, unit,
         formatReadingValue
     } = props;
-    const { sensorChartData } = useContext(AppContext);
+    const { sensorChartPoints } = useContext(AppContext);
+    const lastIndex: number = sensorChartPoints.length - 1;
     const value: number | undefined =
-        sensorChartData[sensorChartData.length - 1]?.[dataKey] ?? undefined
+        sensorChartPoints[lastIndex]?.[readingType] ?? undefined
     ;
 
     return <>
         <div className="sensor-card">
             <h4 className="font-large">
-                {readingTypeLabel}: {formatReadingValue(value)}{unit}
+                {name}: {formatReadingValue(value)}{unit}
             </h4>
         </div>
     </>;

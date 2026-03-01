@@ -67,14 +67,14 @@ export class Esp32Api {
     ========================= */
     
     public async getReadings(
-        startDate: Date | null,
-        endDate: Date | null,
-        excludeStartDate: boolean | null = false,
-        excludeEndDate: boolean | null = false
+        startDate: Date,
+        endDate: Date,
+        excludeStartDate: boolean = false,
+        excludeEndDate: boolean = false
     ): Promise<SensorReading[]> {
 
-        const params: DateRangeDto = this.setDateRangeParams(
-            {}, startDate, endDate, excludeStartDate, excludeEndDate
+        const params: DateRangeDto = this.getDateRangeParams(
+            startDate, endDate, excludeStartDate, excludeEndDate
         );
         try {
 
@@ -90,6 +90,29 @@ export class Esp32Api {
             return [];
 
         }
+
+    }
+
+    /* =========================
+    GET SAFETY LEVELS
+    ========================= */
+    
+    public async getSafetyLevels(
+        readingType: SafetyLevelReadingType
+    ): Promise<SafetyLevel[]> {
+
+        try {
+
+            const route = `/api/safety-levels/` + readingType;
+            const { data } = await this.client.get<SafetyLevel[]>(route, {});
+            return data;
+
+        } catch(error) {
+
+            console.error(`❌ Failed to fetch safety levels`)
+            return [];
+
+        }
         
 
     }
@@ -101,12 +124,12 @@ export class Esp32Api {
     public async deleteReadings(
         startDate: Date,
         endDate: Date,
-        excludeStartDate: boolean | null,
-        excludeEndDate: boolean | null
+        excludeStartDate: boolean = false,
+        excludeEndDate: boolean = false
     ): Promise<SensorReading[]> {
 
-        const params: DateRangeDto = this.setDateRangeParams(
-            {}, startDate, endDate, excludeStartDate, excludeEndDate
+        const params: DateRangeDto = this.getDateRangeParams(
+            startDate, endDate, excludeStartDate, excludeEndDate
         );
         const { data } = await this.client.delete(
             "/api/readings", { params }
@@ -129,14 +152,14 @@ export class Esp32Api {
     /* =========================
     HELPERS
     ========================= */
-    private setDateRangeParams<T extends DateRangeDto>(
-        params: T,
+    private getDateRangeParams(
         startDate: Date | null,
         endDate: Date | null,
         excludeStartDate: boolean | null,
         excludeEndDate: boolean | null
-    ): T {
+    ): DateRangeDto {
 
+        const params: DateRangeDto = {};
         if (startDate) params.startDate = formatISO(startDate);
         if (endDate) params.endDate = formatISO(endDate);
         if (excludeStartDate !== undefined)

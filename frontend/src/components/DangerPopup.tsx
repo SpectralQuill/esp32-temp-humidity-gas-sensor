@@ -14,10 +14,8 @@ interface DangerPopupProps {
 
 export function DangerPopup(props: DangerPopupProps) {
 
-    const {
-        generalSafetyLevel: {label},
-        isConnectedToDatabase
-    } = useContext(AppContext);
+    const { generalSafetyLevel, connectedToApi } = useContext(AppContext);
+    const label = generalSafetyLevel?.label ?? "Unknown";
     const propsIsVisible = props.visible;
     const [isVisible, setIsVisible] = useState<boolean>(propsIsVisible ?? false);
     const dangerPopupClassName = ArrayUtils.filterNotUndefined([
@@ -29,13 +27,14 @@ export function DangerPopup(props: DangerPopupProps) {
         if(propsIsVisible === undefined) setIsVisible(label === 'Danger');
 
     }, [label]);
+    
     useEffect(() => {
 
         if(propsIsVisible !== undefined) setIsVisible(propsIsVisible);
 
     }, [propsIsVisible]);
 
-    if (!isConnectedToDatabase || !isVisible) return <></>;
+    if (!connectedToApi || !isVisible) return <></>;
     return <>
         <Popup className={dangerPopupClassName} visible={isVisible}>
             <div className="danger-icon-wrapper">

@@ -22,7 +22,7 @@ type SafetyLevelReadingType = SensorReadingType | "general";
 interface SafetyLevel {
     readingType: SafetyLevelReadingType;
 	label: string;
-	threshold: number | null;
+	threshold: number;
 	color: string;
 	level: GeneralSafetyLevel
 }

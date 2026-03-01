@@ -3,26 +3,25 @@ import { useContext, useEffect, useState } from "react";
 
 export function ConnectionInformant() {
 
-    const { isConnectedToDatabase } = useContext(AppContext);
+    const { connectedToApi } = useContext(AppContext);
     const [label, setLabel] = useState<string>("Not connected");
     const [color, setColor] = useState<string>("#a1a1a1");
     
     useEffect(() => {
 
-        setLabel(isConnectedToDatabase ? "Connected" : "Not connected");
-        setColor(isConnectedToDatabase ? "#4caf50" : "#a1a1a1");
+        setLabel(connectedToApi ? "Connected" : "Not connected");
+        setColor(connectedToApi ? "#4caf50" : "#a1a1a1");
 
-    }, [isConnectedToDatabase]);
+    }, [connectedToApi]);
 
-    return (
-        <>
-            <div className="connection-informant-wrapper">
-                <div className="connection-informant font-medium" style={{
-                    background: color
-                }}>
-                    {label}
-                </div>
+    return <>
+        <div className="connection-informant-wrapper">
+            <div className="connection-informant font-medium" style={{
+                background: color
+            }}>
+                {label}
             </div>
-        </>
-    );
+        </div>
+    </>;
+
 }
