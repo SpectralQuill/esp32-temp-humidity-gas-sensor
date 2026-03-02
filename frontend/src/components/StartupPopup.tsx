@@ -14,12 +14,23 @@ export function StartupPopup() {
 
     const { connectedToApi } = useContext(AppContext);
     const [isVisible, setIsVisible] = useState(true);
-    const loadingText = useLoadingText();
+    const loadingText = useLoadingText(!connectedToApi);
 
     useEffect(() => {
-        if (!connectedToApi) return;
-        const timeoutId = setTimeout(() => setIsVisible(false), POPUP_CLOSE_TIMEOUT_MS);
+
+        if (!connectedToApi) {
+
+            setIsVisible(true);
+            return;
+
+        }
+        const timeoutId = setTimeout(
+            () => setIsVisible(false),
+            POPUP_CLOSE_TIMEOUT_MS
+        );
+
         return () => clearTimeout(timeoutId);
+
     }, [connectedToApi]);
 
     if (!isVisible) return <></>;

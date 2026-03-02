@@ -3,15 +3,16 @@ import {
     useState
 } from "react";
 
-export const LOADING_TEXTS: ReadonlyArray<string> = ["", ".", "..", "..."] as const;
+export const LOADING_TEXTS = ["", ".", "..", "..."] as const satisfies ReadonlyArray<string>;
 
 /**
  * Custom React hook for generating a loading text that cycles through a series of dots.
  * @returns A string representing the current loading text.
  */
 export function useLoadingText(
-    loadingIntervalMs: number = 500,
-    loadingTexts: string[] = LOADING_TEXTS as string[]
+    active: boolean,
+    loadingIntervalMs: number = 1000,
+    loadingTexts: ReadonlyArray<string> = LOADING_TEXTS
 ) {
 
     const { length } = loadingTexts;
@@ -19,13 +20,29 @@ export function useLoadingText(
 
     useEffect(() => {
 
-        const intervalId = setInterval(() => {
-            const nextIndex = (index + 1) % length;
-            setIndex(nextIndex);
-        }, loadingIntervalMs);
-        return () => clearInterval(intervalId);
+        if (!active) {
 
-    }, []);
+            setIndex(0);
+            return;
+
+        }
+        let cancelled = false;
+        const handleUpdate = () => {
+            if (cancelled) {
+
+                setIndex(0);
+                return;
+
+            }
+            setIndex(index => (index + 1) % length);
+            setTimeout(handleUpdate, loadingIntervalMs);
+        };
+
+        setTimeout(handleUpdate, loadingIntervalMs);
+
+        return () => { cancelled = true; };
+
+    }, [active]);
 
     return loadingTexts[index];
 

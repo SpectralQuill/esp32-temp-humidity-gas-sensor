@@ -4,12 +4,13 @@ import "../style/Dashboard.scss";
 
 export function Dashboard() {
 
-    const formatPercentageValue = (value?: number | null) =>
-        (value != null) ? (value * 100).toFixed(0) : '--'
-    ;
     const formatTemperatureCValue = (value?: number | null) =>
         (value != null) ? value.toFixed(1) : '--'
     ;
+    const formatPercentageValue = (value?: number | null) =>
+        (value != null) ? (value * 100).toFixed(0) : '--'
+    ;
+    const formatPercentageYTick = (value: number) => String(100 * value);
 
     return <>
         <main>
@@ -31,6 +32,7 @@ export function Dashboard() {
                 unit="%"
                 yAxisDomain={[0, 1]}
                 formatReadingValue={formatPercentageValue}
+                formatYTick={formatPercentageYTick}
             />
             <SensorChart
                 color="00cc88"
@@ -39,6 +41,7 @@ export function Dashboard() {
                 unit="%"
                 yAxisDomain={[0, 1]}
                 formatReadingValue={formatPercentageValue}
+                formatYTick={formatPercentageYTick}
             />
         </main>
     </>;
