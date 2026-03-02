@@ -5,13 +5,13 @@
 ## Project Background
 - Language: **TypeScript**
 - Frontend: **Vite + React + Sass**
-- Backend: **CORS + Kysely**
+- Backend: **Express**
 - Database: **SQLite**
 
-## Requirements
-- Node.js
+## Prerequisites
 - Arduino IDE
 - CP210x USB to UART Bridge VCP Drivers (Download Link: [Silicon Labs](https://www.silabs.com/software-and-tools/usb-to-uart-bridge-vcp-drivers?tab=downloads))
+- Node.js
 
 ## Setup and Running
 1. Run to install dependencies:
@@ -24,17 +24,13 @@ npm run init
 ```bash
 npm run get-ip
 ```
-5. Open [esp32/src/v2/v2.ino](esp32/src/v2/v2.ino) in Arduino IDE and fill up the following variable:
+5. Open [esp32/src/v2/v2.ino](esp32/src/v2/v2.ino) in Arduino IDE and fill up the following variables:
     - ssid: Your WiFi SSID
     - password: Your WiFi password
     - serverHost: Your server host IPv4 address (the one obtained in #4)
 6. Upload Arduino code to ESP32.
 7. Run to start backend server:
-```bash
-npm run backend
-```
 8. Run to start frontend server:
-```bash
 npm run frontend
 ```
 9. If successful, the following should happen:

@@ -87,7 +87,7 @@ export class Esp32Api {
         } catch(error) {
 
             console.error(`❌ Failed to fetch readings`)
-            return [];
+            throw new Error(`Failed to fetch readings`)
 
         }
 
@@ -110,7 +110,7 @@ export class Esp32Api {
         } catch(error) {
 
             console.error(`❌ Failed to fetch safety levels`)
-            return [];
+            throw new Error(`Failed to fetch safety levels`)
 
         }
         

@@ -22,11 +22,12 @@ export function SensorCard(props: SensorCardProps) {
     const value: number | undefined =
         sensorChartPoints[lastIndex]?.[readingType] ?? undefined
     ;
+    const hasValue: boolean = (value !== undefined);
 
     return <>
         <div className="sensor-card">
             <h4 className="font-large">
-                {name}: {formatReadingValue(value)}{unit}
+                {name}: {formatReadingValue(value)}{hasValue && unit}
             </h4>
         </div>
     </>;

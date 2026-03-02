@@ -25,13 +25,14 @@ export interface SensorChartProps {
     unit: string;
     yAxisDomain: AxisDomain;
     formatReadingValue(value?: number | null): string;
+    formatYTick?: (value: number) => string
 }
 
 export function SensorChart(props: SensorChartProps) {
 
     const {
         color, name, readingType, unit, yAxisDomain,
-        formatReadingValue
+        formatReadingValue, formatYTick
     } = props;
     const { safetyLevelsMap, sensorChartPoints, sensorChartAxisTicks } = useContext(AppContext);
     const safetyLevels = safetyLevelsMap[readingType];
@@ -67,6 +68,7 @@ export function SensorChart(props: SensorChartProps) {
                             offset: 10,
                         }}
                         tick={{ fontSize: 12 }}
+                        tickFormatter={formatYTick}
                         domain={yAxisDomain}
                     />
                     {safetyLevels.map(({color, label, threshold}) => <ReferenceLine

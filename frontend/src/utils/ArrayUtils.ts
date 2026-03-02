@@ -7,7 +7,7 @@ export class ArrayUtils {
         target: T,
         compare: ArrayItemCompareFunc<T>,
         startIndex: number = 0,
-        endIndex: number = array.length - 1
+        endIndex: number = array.length
     ): number {
 
         if (array.length === 0) return 0;
@@ -16,7 +16,7 @@ export class ArrayUtils {
 		
             const nextIndex = Math.floor((startIndex + endIndex) / 2);
             const comparison = compare(target, array[nextIndex]);
-            if (comparison <= nextIndex)
+            if (comparison <= 0)
                 endIndex = nextIndex;
             else
                 startIndex = nextIndex + 1;
