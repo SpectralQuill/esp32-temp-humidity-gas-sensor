@@ -15,7 +15,7 @@ interface DangerPopupProps {
 export function DangerPopup(props: DangerPopupProps) {
 
     const { generalSafetyLevel, connectedToApi } = useContext(AppContext);
-    const label = generalSafetyLevel?.label ?? "Unknown";
+    const level = generalSafetyLevel?.level ?? "Unknown";
     const propsIsVisible = props.visible;
     const [isVisible, setIsVisible] = useState<boolean>(propsIsVisible ?? false);
     const dangerPopupClassName = ArrayUtils.filterNotUndefined([
@@ -24,9 +24,9 @@ export function DangerPopup(props: DangerPopupProps) {
 
     useEffect(() => {
 
-        if(propsIsVisible === undefined) setIsVisible(label === 'Danger');
+        if(propsIsVisible === undefined) setIsVisible(level === 'Danger');
 
-    }, [label]);
+    }, [level]);
     
     useEffect(() => {
 
