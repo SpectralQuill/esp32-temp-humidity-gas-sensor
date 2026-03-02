@@ -22,7 +22,8 @@ export const SAFETY_LEVELS_MAP_TEMPLATE = {
 
 export function useSafetyLevelsMap(
     api: Esp32Api,
-    active: boolean
+    active: boolean,
+    reconnect: () => void
 ): SafetyLevelsMap {
 
     const [safetyLevelsMap, setSafetyLevelsMap] = useState<SafetyLevelsMap>({
@@ -64,7 +65,16 @@ export function useSafetyLevelsMap(
             }
 
         };
-        handleUpdate();
+
+        try {
+
+            handleUpdate();
+        
+        } catch {
+
+            reconnect();
+
+        }
 
         return () => { cancelled = true; };
 

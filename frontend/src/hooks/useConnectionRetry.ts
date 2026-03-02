@@ -45,15 +45,17 @@ export function useConnectionRetry(
             const result = !isSimulated ? await connect() : false;
             if (cancelled) return;
             if (result) {
+
                 setConnected(true);
                 return;
+                
             }
             if (retryCount < maxRetryCount) setTimeout(handleConnect, retryIntervalMs);
         };
         handleConnect();
         return () => { cancelled = true; };
 
-    }, [connect, maxRetryCount, retryIntervalMs, isSimulated]);
+    }, [connected, maxRetryCount, retryIntervalMs, isSimulated, connect]);
 
     return [connected, connecting, handleReconnect];
 

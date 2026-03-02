@@ -11,7 +11,8 @@ import {
 export function useSensorReadings(
     api: Esp32Api,
     dateRange: DateRange,
-    active: boolean
+    active: boolean,
+    reconnect: () => void
 ): SensorReading[] {
 
     const [sensorReadings, setSensorReadings] = useState<SensorReading[]>([]);
@@ -29,50 +30,59 @@ export function useSensorReadings(
             if (cancelled) return;
             const { current: oldDateRange } = oldDateRangeRef;
 
-            if (!oldDateRange || !dateRange.overlapsWithDateRange(oldDateRange)) {
-                const sensorReadings = await api.getReadings(...dateRange.toArray());
+            try {
+
+                if (!oldDateRange || !dateRange.overlapsWithDateRange(oldDateRange)) {
+                    const sensorReadings = await api.getReadings(...dateRange.toArray());
+                    if (requestIdRef.current !== requestId || cancelled) return;
+
+                    setSensorReadings(sensorReadings);
+                    oldDateRangeRef.current = dateRange;
+                    return;
+                }
+
+                const [oldStartDate, oldEndDate] = oldDateRange.toArray();
+                const [newStartDate, newEndDate] = dateRange.toArray();
+                const [leftSensorReadings, rightSensorReadings] = await Promise.all([
+                    (newStartDate < oldStartDate) ? api.getReadings(
+                        newStartDate, oldStartDate, false, true
+                    ) : [],
+                    (newEndDate > oldEndDate) ? api.getReadings(
+                        oldEndDate, newEndDate, true, false
+                    ) : []
+                ]);
                 if (requestIdRef.current !== requestId || cancelled) return;
-                setSensorReadings(sensorReadings);
+
+                setSensorReadings(sensorReadings => {
+                    let startIndex = 0;
+                    let endIndex = sensorReadings.length;
+                    if (newEndDate < oldEndDate) endIndex = ArrayUtils.binarySearchIndex(
+                        sensorReadings,
+                        { createdAt: addMilliseconds(newEndDate, 1) } as SensorReading,
+                        compareSensorReadings
+                    );
+                    if (newStartDate > oldStartDate) startIndex = ArrayUtils.binarySearchIndex(
+                        sensorReadings,
+                        { createdAt: newStartDate } as SensorReading,
+                        compareSensorReadings,
+                        0,
+                        endIndex
+                    );
+                    const middleSensorReadings = sensorReadings.slice(startIndex, endIndex);
+                    return [
+                        ...leftSensorReadings,
+                        ...middleSensorReadings,
+                        ...rightSensorReadings
+                    ];
+                });
+
                 oldDateRangeRef.current = dateRange;
-                return;
+
+            } catch {
+
+                reconnect();
+
             }
-
-            const [oldStartDate, oldEndDate] = oldDateRange.toArray();
-            const [newStartDate, newEndDate] = dateRange.toArray();
-            const [leftSensorReadings, rightSensorReadings] = await Promise.all([
-                (newStartDate < oldStartDate) ? api.getReadings(
-                    newStartDate, oldStartDate, false, true
-                ) : [],
-                (newEndDate > oldEndDate) ? api.getReadings(
-                    oldEndDate, newEndDate, true, false
-                ) : []
-            ]);
-            if (requestIdRef.current !== requestId || cancelled) return;
-
-            setSensorReadings(sensorReadings => {
-                let startIndex = 0;
-                let endIndex = sensorReadings.length;
-                if (newEndDate < oldEndDate) endIndex = ArrayUtils.binarySearchIndex(
-                    sensorReadings,
-                    { createdAt: addMilliseconds(newEndDate, 1) } as SensorReading,
-                    compareSensorReadings
-                );
-                if (newStartDate > oldStartDate) startIndex = ArrayUtils.binarySearchIndex(
-                    sensorReadings,
-                    { createdAt: newStartDate } as SensorReading,
-                    compareSensorReadings,
-                    0,
-                    endIndex
-                );
-                const middleSensorReadings = sensorReadings.slice(startIndex, endIndex);
-                return [
-                    ...leftSensorReadings,
-                    ...middleSensorReadings,
-                    ...rightSensorReadings
-                ];
-            });
-
-            oldDateRangeRef.current = dateRange;
 
         };
         handleUpdate();

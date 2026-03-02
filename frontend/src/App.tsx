@@ -36,7 +36,7 @@ export default function App() {
     ));
     const connect = useCallback(() => api.checkConnection(), [api]);
 
-    const [connectedToApi, connectingToApi] = useConnectionRetry(
+    const [connectedToApi, connectingToApi, reconnect] = useConnectionRetry(
         connect,
         envMap.VITE_API_RETRY_INTERVAL_MS,
         envMap.VITE_API_MAX_RETRY_COUNT,
@@ -48,13 +48,13 @@ export default function App() {
         graphRangeMs,
         connectedToApi
     );
-    const sensorReadings = useSensorReadings(api, dateRange, connectedToApi);
+    const sensorReadings = useSensorReadings(api, dateRange, connectedToApi, reconnect);
     const [sensorChartPoints, sensorChartAxisTicks, sensorChartRange] = useSensorChartData(
         sensorReadings,
         dateRange,
         connectedToApi
     );
-    const safetyLevelsMap = useSafetyLevelsMap(api, connectedToApi);
+    const safetyLevelsMap = useSafetyLevelsMap(api, connectedToApi, reconnect);
     const generalSafetyLevel = useGeneralSafetyLevel(
         sensorReadings[sensorReadings.length - 1],
         safetyLevelsMap,
