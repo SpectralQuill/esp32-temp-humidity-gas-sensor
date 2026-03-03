@@ -1,4 +1,5 @@
 import { AppContext } from "../contexts/AppContext";
+import { hexColor } from "../taggedTemplates/hexColor";
 import { useContext, useEffect, useState } from "react";
 
 export function ConnectionInformant() {
@@ -17,7 +18,7 @@ export function ConnectionInformant() {
     return <>
         <div className="connection-informant-wrapper">
             <div className="connection-informant font-medium" style={{
-                background: color
+                background: hexColor`${color}`
             }}>
                 {label}
             </div>

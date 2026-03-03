@@ -1,5 +1,6 @@
 import { TooltipProps } from "recharts";
 import { format as formatDate } from "date-fns";
+import { hexColor } from "../taggedTemplates/hexColor";
 import {
     NameType,
     Payload,
@@ -53,13 +54,13 @@ export function SensorTooltip({
                 <li style={{color: '#888'}}>
                     Time: {formatDate(timestamp, "hh:mm:ss a")}
                 </li>
-                <li style={{color: readingColor}}>
+                <li style={{color: hexColor`${readingColor}`}}>
                     {readingTypeLabel}: {formatReadingValue(value)}{unit}
                 </li>
-                <li style={{color: referenceLineColor}}>
+                <li style={{color: hexColor`${referenceLineColor}`}}>
                     {referenceLineLabel}
                 </li>
-                <li style={{color: generalSafetyLevelColor}}>
+                <li style={{color: hexColor`${generalSafetyLevelColor}`}}>
                     {generalSafetyLevelLabel}
                 </li>
             </ul>

@@ -12,6 +12,7 @@ import {
 } from "recharts";
 import { AxisDomain } from "recharts/types/util/types";
 import { format as formatDate } from "date-fns";
+import { hexColor } from "../taggedTemplates/hexColor";
 import { SensorCard } from "./SensorCard";
 import { SensorTooltip } from "./SensorTooltip";
 import { useContext } from "react";
@@ -40,7 +41,7 @@ export function SensorChart(props: SensorChartProps) {
     return <>
         <div className="sensor-chart-wrapper">
             <SensorCard
-                color={color}
+                color={hexColor`${color}`}
                 readingType={readingType}
                 name={name}
                 unit={unit}
@@ -74,12 +75,12 @@ export function SensorChart(props: SensorChartProps) {
                     {safetyLevels.map(({color, label, threshold}) => <ReferenceLine
                         key={threshold}
                         y={threshold}
-                        stroke={`#` + color}
+                        stroke={hexColor`${color}`}
                         strokeWidth={1.5}
                         label={{
                             value: label,
                             position: "insideBottomLeft",
-                            fill: color,
+                            fill: hexColor`${color}`,
                             fontSize: 10,
                         }}
                     />)}
@@ -93,8 +94,8 @@ export function SensorChart(props: SensorChartProps) {
                     <Area
                         type="monotone"
                         dataKey={readingType}
-                        stroke={`#` + color}
-                        fill={`#` + color}
+                        stroke={hexColor`${color}`}
+                        fill={hexColor`${color}`}
                         fillOpacity={0.3}
                         strokeWidth={2}
                         name={name}
