@@ -4,16 +4,17 @@ import { useContext, useEffect, useState } from "react";
 
 export function ConnectionInformant() {
 
-    const { connectedToApi } = useContext(AppContext);
+    const { connectedToApi, connectedToEsp32 } = useContext(AppContext);
     const [label, setLabel] = useState<string>("Not connected");
     const [color, setColor] = useState<string>("#a1a1a1");
+    const connected = (connectedToApi && connectedToEsp32);
     
     useEffect(() => {
 
-        setLabel(connectedToApi ? "Connected" : "Not connected");
-        setColor(connectedToApi ? "#4caf50" : "#a1a1a1");
+        setLabel(connected ? "Connected" : "Not connected");
+        setColor(connected ? "#4caf50" : "#a1a1a1");
 
-    }, [connectedToApi]);
+    }, [connected]);
 
     return <>
         <div className="connection-informant-wrapper">

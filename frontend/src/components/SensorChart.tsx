@@ -96,6 +96,7 @@ export function SensorChart(props: SensorChartProps) {
                     }/>
                     <Legend />
                     <Area
+                        isAnimationActive={false}
                         type="monotone"
                         dataKey={readingType}
                         fill="none"
@@ -103,14 +104,14 @@ export function SensorChart(props: SensorChartProps) {
                         name={name}
                         dot={<SensorDot
                             colorBasis="readingType"
-                            r={5}
+                            r={3}
                             readingType={readingType}
                             readingTypeColor={color}
                             safetyLevels={safetyLevels}
                         />}
                         activeDot={<SensorDot
                             colorBasis="generalSafetyLevel"
-                            r={8}
+                            r={5}
                             readingType={readingType}
                             readingTypeColor={color}
                             safetyLevels={safetyLevels}
