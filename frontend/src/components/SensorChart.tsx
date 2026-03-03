@@ -14,6 +14,7 @@ import { AxisDomain } from "recharts/types/util/types";
 import { format as formatDate } from "date-fns";
 import { hexColor } from "../taggedTemplates/hexColor";
 import { SensorCard } from "./SensorCard";
+import { SensorDot } from "./SensorDot";
 import { SensorTooltip } from "./SensorTooltip";
 import { useContext } from "react";
 
@@ -35,7 +36,9 @@ export function SensorChart(props: SensorChartProps) {
         color, name, readingType, unit, yAxisDomain,
         formatReadingValue, formatYTick
     } = props;
-    const { safetyLevelsMap, sensorChartPoints, sensorChartAxisTicks } = useContext(AppContext);
+    const {
+        safetyLevelsMap, sensorChartPoints, sensorChartAxisTicks
+    } = useContext(AppContext);
     const safetyLevels = safetyLevelsMap[readingType];
 
     return <>
@@ -86,6 +89,7 @@ export function SensorChart(props: SensorChartProps) {
                     />)}
                     <Tooltip content={
                         <SensorTooltip
+                            safetyLevelsMap={safetyLevelsMap}
                             unit={unit}
                             formatReadingValue={formatReadingValue}
                         />
@@ -94,13 +98,24 @@ export function SensorChart(props: SensorChartProps) {
                     <Area
                         type="monotone"
                         dataKey={readingType}
-                        stroke={hexColor`${color}`}
-                        fill={hexColor`${color}`}
-                        fillOpacity={0.3}
-                        strokeWidth={2}
+                        fill="none"
+                        fillOpacity={1}
                         name={name}
-                        dot={{ r: 3 }}
-                        activeDot={{ r: 6 }}
+                        dot={<SensorDot
+                            colorBasis="readingType"
+                            r={5}
+                            readingType={readingType}
+                            readingTypeColor={color}
+                            safetyLevels={safetyLevels}
+                        />}
+                        activeDot={<SensorDot
+                            colorBasis="generalSafetyLevel"
+                            r={8}
+                            readingType={readingType}
+                            readingTypeColor={color}
+                            safetyLevels={safetyLevels}
+                        />}
+                        stroke={hexColor`${color}`}
                         connectNulls={true}
                     />
                 </AreaChart>
@@ -109,4 +124,3 @@ export function SensorChart(props: SensorChartProps) {
     </>;
 
 }
-
