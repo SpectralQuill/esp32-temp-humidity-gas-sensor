@@ -52,7 +52,7 @@ export function useSensorChartData(
         sensorChartPointsRef.current = sensorChartPoints;
         sensorAxisTicksRef.current = sensorChartAxisTicks;
 
-    }, [sensorChartPoints, sensorChartAxisTicks, sensorChartRange]);
+    }, [sensorChartPoints, sensorChartAxisTicks]);
 
     return [sensorChartPoints, sensorChartAxisTicks];
 

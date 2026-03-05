@@ -34,7 +34,7 @@ export function useGeneralSafetyLevel(
         ;
         return safetyLevelsMap.general[generalSafetyLevelIndex];
 
-    }, [sensorReading, safetyLevelsMap]);
+    }, [sensorReading, safetyLevelsMap, active]);
 
 }
 

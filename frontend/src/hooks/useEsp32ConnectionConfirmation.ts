@@ -18,6 +18,6 @@ export function useEsp32ConnectionConfirmation(
         const difference = differenceInMilliseconds(endDate, createdAt);
         return (difference <= refreshIntervalMs + marginMs);
 
-    }, [sensorReadings, refreshIntervalMs]);
+    }, [sensorReadings, dateRange, refreshIntervalMs, marginMs]);
 
 }

@@ -77,15 +77,14 @@ export default function App() {
         connectedToApi
     );
     const appContext = useMemo<AppContextProps>(() =>({
-        connectedToApi, connectingToApi,
-        connectedToEsp32,
+        connectedToApi, connectingToApi, connectedToEsp32,
         generalSafetyLevel,
         graphRangeMs, setGraphRangeMs,
         safetyLevelsMap,
         sensorChartPoints, sensorChartAxisTicks
     }), [
-        connectedToApi, connectingToApi, connectedToEsp32, dateRange, generalSafetyLevel,
-        safetyLevelsMap, sensorChartPoints, sensorChartAxisTicks
+        connectedToApi, connectingToApi, connectedToEsp32,
+        dateRange, generalSafetyLevel, graphRangeMs, safetyLevelsMap
     ]);
 
     return <AppContext.Provider value={appContext}>
