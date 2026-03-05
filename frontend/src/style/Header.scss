@@ -43,4 +43,23 @@ header {
 
         background: $primary-color;
     }
+
+    @media (max-width: 600px) {
+
+        h1.font-large {
+            font:
+                16px/1.5 Helvetica,
+                sans-serif;
+        }
+
+        .level-informant.font-medium, .connection-informant.font-medium {
+            width: calc(90% - 0.5em);
+            font-size: 12px;
+        }
+
+        #graph-range {
+            width: calc(100% - 1em);
+        }
+
+    }
 }

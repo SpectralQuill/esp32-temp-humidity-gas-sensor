@@ -7,7 +7,7 @@ export class DateUtils {
     ) {
 
         const dateMs: number = date.getTime();
-        return Math.floor((dateMs - offsetMs) / intervalMs) * intervalMs + offsetMs;
+        return Math.ceil((dateMs - offsetMs) / intervalMs) * intervalMs + offsetMs;
 
     }
 

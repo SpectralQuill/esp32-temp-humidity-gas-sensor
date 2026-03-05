@@ -12,7 +12,7 @@ import {
  * @returns A tuple containing:
  * - [0] connected: Is true when connection is successful.
  * - [1] connecting: Is true when hook is still attempting to connect.
- * - [2] reconnect(): Marks connection as failed until connect() becomes successful again.
+ * - [2] reconnectToApi(): Marks connection as failed until connect() becomes successful again.
  */
 export function useConnectionRetry(
     connect: () => Promise<boolean> | boolean,

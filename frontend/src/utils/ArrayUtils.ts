@@ -29,7 +29,7 @@ export class ArrayUtils {
 
     public static clearArray<T>(array: T[]): T[] {
 
-        array.splice(0, array.length)
+        array.length = 0;
         return array;
 
     }

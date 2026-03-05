@@ -113,10 +113,10 @@ export function getSensorChartRange(
     dateRange: DateRange
 ): SensorChartRange {
 
-    const difference = dateRange.endDate.getTime() - dateRange.startDate.getTime();
+    const { rangeMs } = dateRange;
     for (let sensorChartRange of SENSOR_CHART_RANGES)
-        if (difference <= sensorChartRange.rangeMs)
+        if (rangeMs <= sensorChartRange.rangeMs)
             return sensorChartRange;
-    throw new Error(`Date range of ${difference}ms is far too large for the chart`);
+    throw new Error(`Date range of ${rangeMs}ms is far too large for the chart`);
 
 }

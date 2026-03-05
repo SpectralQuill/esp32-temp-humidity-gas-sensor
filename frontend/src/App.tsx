@@ -16,6 +16,7 @@ import {
     useMemo
 } from "react";
 import { useConnectionRetry } from "./hooks/useConnectionRetry";
+import { useEsp32ConnectionConfirmation } from "./hooks/useEsp32ConnectionConfirmation";
 import { useGeneralSafetyLevel } from "./hooks/useGeneralSafetyLevel";
 import { useSafetyLevelsMap } from "./hooks/useSafetyLevelsMap";
 import { useSensorChartData } from "./hooks/useSensorChartData";
@@ -24,6 +25,7 @@ import { useSlidingDateRange } from "./hooks/useSlidingDateRange";
 import { VariableLogger } from "./components/VariableLogger";
 
 import "./style/App.scss";
+import { ArrayUtils } from "./utils/ArrayUtils";
 
 const DEFAULT_GRAPH_RANGE_MS = minutesToMilliseconds(1);
 
@@ -36,7 +38,7 @@ export default function App() {
     ));
     const connect = useCallback(() => api.checkConnection(), [api]);
 
-    const [connectedToApi, connectingToApi, reconnect] = useConnectionRetry(
+    const [connectedToApi, connectingToApi, reconnectToApi] = useConnectionRetry(
         connect,
         envMap.VITE_API_RETRY_INTERVAL_MS,
         envMap.VITE_API_MAX_RETRY_COUNT,
@@ -48,27 +50,39 @@ export default function App() {
         graphRangeMs,
         connectedToApi
     );
-    const sensorReadings = useSensorReadings(api, dateRange, connectedToApi, reconnect);
+    const sensorReadings = useSensorReadings(
+        api,
+        dateRange,
+        connectedToApi,
+        reconnectToApi
+    );
+    const connectedToEsp32 = useEsp32ConnectionConfirmation(
+        sensorReadings,
+        dateRange,
+        envMap.VITE_CHART_REFRESH_INTERVAL_MS,
+        1.5 * envMap.VITE_CHART_REFRESH_INTERVAL_MS
+    );
     const [sensorChartPoints, sensorChartAxisTicks, sensorChartRange] = useSensorChartData(
         sensorReadings,
         dateRange,
         connectedToApi
     );
-    const safetyLevelsMap = useSafetyLevelsMap(api, connectedToApi, reconnect);
+    const safetyLevelsMap = useSafetyLevelsMap(api, connectedToApi, reconnectToApi);
     const generalSafetyLevel = useGeneralSafetyLevel(
         sensorReadings[sensorReadings.length - 1],
         safetyLevelsMap,
         connectedToApi
     );
-    const appContext = useMemo<AppContextProps>(() => ({
+    const appContext = useMemo<AppContextProps>(() =>({
         connectedToApi, connectingToApi,
+        connectedToEsp32,
         generalSafetyLevel,
         graphRangeMs, setGraphRangeMs,
         safetyLevelsMap,
         sensorChartPoints, sensorChartAxisTicks
     }), [
-        connectedToApi, connectingToApi, graphRangeMs, sensorChartPoints,
-        sensorChartAxisTicks
+        connectedToApi, connectingToApi, connectedToEsp32, dateRange, generalSafetyLevel,
+        safetyLevelsMap, sensorChartPoints, sensorChartAxisTicks
     ]);
 
     return <AppContext.Provider value={appContext}>
@@ -81,6 +95,7 @@ export default function App() {
                 <DangerPopup visible={undefined} />
             </>
             <>{/* Variable loggers */}
+                {/* <h4>{sensorReadings.length}</h4> */}
                 <VariableLogger variable={dateRange} visible={false}>
                     Log Dates
                 </VariableLogger>

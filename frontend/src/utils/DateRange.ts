@@ -17,6 +17,12 @@ export class DateRange {
 
     }
 
+    public get rangeMs(): number {
+
+        return this.endDate.getTime() - this.startDate.getTime();
+
+    }
+
     public get startDate(): Date {
 
         return new Date(this._startDate);

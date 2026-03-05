@@ -8,7 +8,7 @@ export function Header() {
 
     return <>
         <header>
-            <h1 className="font-large">ESP32 Sensor Dashboard</h1>
+            <h1 className="font-large">ESP32 Sensors</h1>
             <SafetyLevelInformant />
             <ConnectionInformant />
             <GraphRangeSelection />
