@@ -61,6 +61,10 @@ export function SensorChart(props: SensorChartProps) {
                         tick={{ fontSize: 12 }}
                         ticks={sensorChartAxisTicks}
                         type="number"
+                        domain={[
+                            sensorChartAxisTicks[0],
+                            sensorChartAxisTicks[sensorChartAxisTicks.length - 1]
+                        ]}
                         interval="preserveStartEnd"
                         tickFormatter={(timestamp)=>formatDate(timestamp, "hh:mm a")}
                     />
@@ -105,6 +109,7 @@ export function SensorChart(props: SensorChartProps) {
                         fillOpacity={1}
                         name={name}
                         dot={<SensorDot
+                            {...props}
                             colorBasis="readingType"
                             r={3}
                             readingType={readingType}
@@ -112,6 +117,7 @@ export function SensorChart(props: SensorChartProps) {
                             safetyLevels={safetyLevels}
                         />}
                         activeDot={<SensorDot
+                            {...props}
                             colorBasis="generalSafetyLevel"
                             r={5}
                             readingType={readingType}

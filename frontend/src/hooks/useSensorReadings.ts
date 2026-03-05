@@ -1,5 +1,6 @@
 import { DateRange } from "../utils/DateRange";
 import { Esp32Api } from "../services/Esp32Api";
+import { SensorChartRange } from "../constants/sensorChartRangesData";
 import {
     useEffect,
     useRef,
@@ -9,6 +10,7 @@ import {
 export function useSensorReadings(
     api: Esp32Api,
     dateRange: DateRange,
+    sensorChartRange: SensorChartRange,
     active: boolean,
     reconnectToApi: () => void
 ): SensorReading[] {
@@ -26,7 +28,12 @@ export function useSensorReadings(
             if (cancelled) return;
             try {
 
-                const readings = await api.getReadings(...dateRange.toArray());
+                const { startDate, endDate } = dateRange;
+                const readings = await api.getReadings(
+                    startDate, endDate,
+                    false, false,
+                    sensorChartRange.pointIntervalMs, endDate
+                );
                 if (cancelled || requestIdRef.current !== requestId) return;
                 sensorReadingsRef.current = readings;
                 if (cancelled || requestIdRef.current !== requestId) return;
@@ -42,7 +49,7 @@ export function useSensorReadings(
 
         return () => { cancelled = true; };
 
-    }, [api, dateRange, active]);
+    }, [api, dateRange, sensorChartRange, active]);
 
     return sensorReadings;
 

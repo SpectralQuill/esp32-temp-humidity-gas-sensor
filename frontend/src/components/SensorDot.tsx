@@ -17,11 +17,13 @@ export interface SensorDotProps extends DotProps {
 export function SensorDot(props: SensorDotProps) {
 
     const {
-        colorBasis, cx, cy, payload, r: radius, readingType, readingTypeColor, safetyLevels
+        colorBasis, cx, cy, payload: sensorChartPoint, r: radius,
+        readingType, readingTypeColor, safetyLevels
     } = props;
+    if (!sensorChartPoint) return <></>;
     let color = "#a1a1a1";
 
-    const value = payload?.[readingType];
+    const value = sensorChartPoint[readingType];
     if (value != undefined) switch (colorBasis) {
 
         case "generalSafetyLevel":

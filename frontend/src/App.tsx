@@ -20,12 +20,12 @@ import { useEsp32ConnectionConfirmation } from "./hooks/useEsp32ConnectionConfir
 import { useGeneralSafetyLevel } from "./hooks/useGeneralSafetyLevel";
 import { useSafetyLevelsMap } from "./hooks/useSafetyLevelsMap";
 import { useSensorChartData } from "./hooks/useSensorChartData";
+import { useSensorChartRange } from "./hooks/useSensorChartRange";
 import { useSensorReadings } from "./hooks/useSensorReadings";
 import { useSlidingDateRange } from "./hooks/useSlidingDateRange";
 import { VariableLogger } from "./components/VariableLogger";
 
 import "./style/App.scss";
-import { ArrayUtils } from "./utils/ArrayUtils";
 
 const DEFAULT_GRAPH_RANGE_MS = minutesToMilliseconds(1);
 
@@ -50,9 +50,11 @@ export default function App() {
         graphRangeMs,
         connectedToApi
     );
+    const sensorChartRange = useSensorChartRange(dateRange, connectedToApi);
     const sensorReadings = useSensorReadings(
         api,
         dateRange,
+        sensorChartRange,
         connectedToApi,
         reconnectToApi
     );
@@ -62,9 +64,10 @@ export default function App() {
         envMap.VITE_CHART_REFRESH_INTERVAL_MS,
         1.5 * envMap.VITE_CHART_REFRESH_INTERVAL_MS
     );
-    const [sensorChartPoints, sensorChartAxisTicks, sensorChartRange] = useSensorChartData(
+    const [sensorChartPoints, sensorChartAxisTicks] = useSensorChartData(
         sensorReadings,
         dateRange,
+        sensorChartRange,
         connectedToApi
     );
     const safetyLevelsMap = useSafetyLevelsMap(api, connectedToApi, reconnectToApi);
@@ -86,84 +89,22 @@ export default function App() {
     ]);
 
     return <AppContext.Provider value={appContext}>
-            <>{/* Content */}
-                <Header />
-                <Dashboard />
-            </>
-            <>{/* Popups */}
-                <StartupPopup />
-                <DangerPopup visible={undefined} />
-            </>
-            <>{/* Variable loggers */}
-                {/* <h4>{sensorReadings.length}</h4> */}
-                <VariableLogger variable={dateRange} visible={false}>
-                    Log Dates
-                </VariableLogger>
-                <VariableLogger variable={sensorChartPoints} visible={false}>
-                    Log Sensor Chart Points
-                </VariableLogger>
-            </>
-        {/* <table>
-            <thead><tr>
-                <td>Created at</td>
-                <td>Temp</td>
-                <td>Humidity</td>
-                <td>Gas</td>
-            </tr></thead>
-            <tbody>
-                {
-                    sensorReadings.map((reading, index) => <Fragment key={index}>
-                        <tr>
-                            <td>{formatDate(reading.createdAt, "yyyy-MM-dd HH:mm:ss")}</td>
-                            <td>{reading.temperatureC}</td>
-                            <td>{reading.humidity}</td>
-                            <td>{reading.gas}</td>
-                        </tr>
-                    </Fragment>)
-                }
-            </tbody>
-        </table> */}
+        <>{/* Content */}
+            <Header />
+            <Dashboard />
+        </>
+        <>{/* Popups */}
+            <StartupPopup />
+            <DangerPopup visible={undefined} />
+        </>
+        <>{/* Variable loggers */}
+            {/* <h4>{sensorReadings.length}</h4> */}
+            <VariableLogger variable={dateRange} visible={false}>
+                Log Dates
+            </VariableLogger>
+            <VariableLogger variable={sensorChartPoints} visible={false}>
+                Log Sensor Chart Points
+            </VariableLogger>
+        </>
     </AppContext.Provider>;
-
-    // const [graphRangeMs, setGraphRangeMs] = useState<number>(
-    //     DEFAULT_GRAPH_RANGE_BEFORE_MIN
-    // );
-    // const connectedToApi = useConnection(
-    //     SensorApi.checkDatabaseConnection, 
-    //     CONNECTION_INTERVAL_MS,
-    //     DATABASE_CONNECTION_SIMULATIONS_COUNT
-    // );
-    // const [startDate, endDate] = useSlidingDateRange(
-    //     SENSOR_GRAPHS_REFRESH_INTERVAL_MS, graphRangeMs, connectedToApi
-    // );
-    // const [sensorChartData, sensorChartXTicks, generalSafetyLevel] = useSensorChartData(
-    //     startDate, endDate, connectedToApi
-    // );
-    // const appContext: AppContextProps = {
-    //     generalSafetyLevel,
-    //     graphRangeMs, setGraphRangeMs,
-    //     connectedToApi,
-    //     sensorChartData, sensorChartXTicks
-    // }
-
-    // return (
-    //     <AppContext.Provider value={appContext}>
-    //         <>{/* Content */}
-    //             <Header />
-    //             <Dashboard />
-    //         </>
-    //         <>{/* Popups */}
-    //             <StartupPopup />
-    //             <DangerPopup visible={undefined} />
-    //         </>
-    //         <>{/* Variable loggers */}
-    //             <VariableLogger variable={[startDate, endDate]} visible={false}>
-    //                 Log Dates
-    //             </VariableLogger>
-    //             <VariableLogger variable={sensorChartData} visible={false}>
-    //                 Log Sensor Data
-    //             </VariableLogger>
-    //         </>
-    //     </AppContext.Provider>
-    // );
 }
