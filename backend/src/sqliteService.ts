@@ -1,3 +1,4 @@
+import { DateUtils } from "../utils/DateUtils";
 import {
     Esp32DatabaseSchema,
     Esp32KyselyClient,
@@ -7,6 +8,13 @@ import { format as formatDate } from "date-fns";
 import { Kysely } from "kysely";
 
 const DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
+
+export const SENSOR_READING_BUCKET_TEMPLATE = {
+    temperatureC: 0,
+    humidity: 0,
+    gas: 0,
+    readingsCount: 0
+} as const satisfies SensortReadingBucket;
 
 export class Esp32SqliteService {
 
@@ -126,7 +134,9 @@ export class Esp32SqliteService {
         startDate: Date | null,
         endDate: Date | null,
         excludeStartDate: boolean | null = false,
-        excludeEndDate: boolean | null = false
+        excludeEndDate: boolean | null = false,
+        bucketIntervalMs: number | null = null,
+        bucketOffsetDate: Date | null = null
     ): Promise<SensorReading[]> {
         
         if (!startDate) startDate = await this.getMinCreatedAt() ?? new Date(0);
@@ -146,9 +156,19 @@ export class Esp32SqliteService {
             : query.where("createdAt", "<=", endDate.toISOString())
         );
         query = query.orderBy("createdAt", "asc");
-        const rows = (await query.execute()) as SensorReadingRow[];
-        
-        return rows.map(Esp32SqliteService.convertSensorReadingRow);
+        const rows: SensorReadingRow[] = await query.execute();
+        const sensorReadings = rows.map(Esp32SqliteService.convertSensorReadingRow);
+
+        if (bucketIntervalMs === null && bucketOffsetDate === null)
+            return sensorReadings;
+        if (bucketIntervalMs === null) throw new Error(
+            "Bucket interval ms cannot be null when bucket offset Date is given."
+        );
+        return this.getBucketedReadings(
+            sensorReadings,
+            Math.abs(bucketIntervalMs),
+            bucketOffsetDate ? bucketOffsetDate : startDate
+        );
 
     }
     
@@ -228,6 +248,44 @@ export class Esp32SqliteService {
 
         await this.database.deleteFrom(Esp32DatabaseTableNames.SensorReadings).execute();
         console.log("✅ Database reset");
+
+    }
+
+    private getBucketedReadings(
+        sensorReadings: SensorReading[],
+        bucketIntervalMs: number,
+        bucketOffsetDate: Date
+    ): SensorReading[] {
+
+        if (bucketIntervalMs === 0)
+            throw new Error("Bucket interval ms cannot be 0");
+        const buckets = new Map<number, SensortReadingBucket>();
+        const bucketOffsetMs = bucketOffsetDate.getTime();
+        const bucketedSensorReadings: SensorReading[] = [];
+        
+        for (const { createdAt, temperatureC, humidity, gas } of sensorReadings) {
+
+            const timestamp = DateUtils.bucket(createdAt, bucketIntervalMs, bucketOffsetMs);
+            if (!buckets.has(timestamp))
+                buckets.set(timestamp, { ...SENSOR_READING_BUCKET_TEMPLATE });
+            const bucket = buckets.get(timestamp)!;
+            bucket.temperatureC += temperatureC;
+            bucket.humidity += humidity;
+            bucket.gas += gas;
+            bucket.readingsCount++;
+            
+        }
+        for (let [timestamp, { temperatureC, humidity, gas, readingsCount }] of buckets) {
+
+            const createdAt = new Date(timestamp);
+            temperatureC /= readingsCount;
+            humidity /= readingsCount;
+            gas /= readingsCount;
+            bucketedSensorReadings.push({ createdAt, temperatureC, humidity, gas });
+
+        }
+
+        return bucketedSensorReadings;
 
     }
 

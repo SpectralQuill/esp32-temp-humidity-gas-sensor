@@ -9,6 +9,13 @@ interface SensorReadingRow {
     gas: number;
 }
 
+interface SensortReadingBucket {
+    temperatureC: number;
+    humidity: number;
+    gas: number;
+    readingsCount: number;
+};
+
 type SafetyLevelRow = SafetyLevel;
 
 /*  =========================
@@ -27,6 +34,11 @@ interface DateRangeDto {
     endDate?: string;
     excludeStartDate?: BooleanString;
     excludeEndDate?: BooleanString;
+}
+
+interface BucketedDateRangeDto extends DateRangeDto {
+    bucketIntervalMs?: number;
+    bucketOffsetDate?: Date;
 }
 
 interface GetSafetyLevelsDto {
