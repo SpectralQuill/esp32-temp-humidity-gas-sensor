@@ -54,14 +54,13 @@ export default function App() {
         api,
         dateRange,
         connectedToApi,
-        reconnectToApi,
-        envMap.VITE_CHART_REFRESH_INTERVAL_MS
+        reconnectToApi
     );
     const connectedToEsp32 = useEsp32ConnectionConfirmation(
         sensorReadings,
         dateRange,
         envMap.VITE_CHART_REFRESH_INTERVAL_MS,
-        100
+        1.5 * envMap.VITE_CHART_REFRESH_INTERVAL_MS
     );
     const [sensorChartPoints, sensorChartAxisTicks, sensorChartRange] = useSensorChartData(
         sensorReadings,
@@ -82,7 +81,7 @@ export default function App() {
         safetyLevelsMap,
         sensorChartPoints, sensorChartAxisTicks
     }), [
-        connectedToApi, connectingToApi, connectedToEsp32, generalSafetyLevel,
+        connectedToApi, connectingToApi, connectedToEsp32, dateRange, generalSafetyLevel,
         safetyLevelsMap, sensorChartPoints, sensorChartAxisTicks
     ]);
 
@@ -96,6 +95,7 @@ export default function App() {
                 <DangerPopup visible={undefined} />
             </>
             <>{/* Variable loggers */}
+                {/* <h4>{sensorReadings.length}</h4> */}
                 <VariableLogger variable={dateRange} visible={false}>
                     Log Dates
                 </VariableLogger>

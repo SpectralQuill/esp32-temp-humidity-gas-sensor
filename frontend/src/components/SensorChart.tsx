@@ -87,13 +87,15 @@ export function SensorChart(props: SensorChartProps) {
                             fontSize: 10,
                         }}
                     />)}
-                    <Tooltip content={
-                        <SensorTooltip
+                    <Tooltip
+                        isAnimationActive={false}
+                        content={<SensorTooltip
+                            isAnimationActive={false}
                             safetyLevelsMap={safetyLevelsMap}
                             unit={unit}
                             formatReadingValue={formatReadingValue}
-                        />
-                    }/>
+                        />}
+                    />
                     <Legend />
                     <Area
                         isAnimationActive={false}
