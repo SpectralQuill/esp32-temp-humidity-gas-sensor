@@ -70,12 +70,16 @@ export class Esp32Api {
         startDate: Date,
         endDate: Date,
         excludeStartDate: boolean = false,
-        excludeEndDate: boolean = false
+        excludeEndDate: boolean = false,
+        bucketIntervalMs: number | null = null,
+        bucketOffsetDate: Date | null = null
     ): Promise<SensorReading[]> {
 
-        const params: DateRangeDto = this.getDateRangeParams(
+        const params: BucketedDateRangeDto = this.getDateRangeParams(
             startDate, endDate, excludeStartDate, excludeEndDate
         );
+        params.bucketIntervalMs = bucketIntervalMs ?? undefined;
+        params.bucketOffsetDate = bucketOffsetDate ?? undefined;
         try {
 
             const { data } = await this.client.get<SensorReading[]>(

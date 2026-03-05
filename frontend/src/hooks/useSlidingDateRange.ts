@@ -1,4 +1,5 @@
 import { DateRange } from "../utils/DateRange";
+import { DateUtils } from "../utils/DateUtils";
 import { subMilliseconds } from "date-fns";
 import {
     useEffect,
@@ -35,7 +36,7 @@ export function useSlidingDateRange(
 
 export function getCurrentDateRange(rangeMs: number): DateRange {
 
-    const now = new Date();
+    const now = new Date(DateUtils.bucket(new Date(), 1000));
     const past = subMilliseconds(now, rangeMs);
     return new DateRange(past, now);
 

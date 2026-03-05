@@ -7,7 +7,12 @@
     }
 
     .popup-body {
-        padding: 5em;
+        @media (min-width: 600px) {
+            padding: 5em;
+        }
+        @media (max-width: 600px) {
+            padding: 1em;
+        }
     }
 
     h2 {

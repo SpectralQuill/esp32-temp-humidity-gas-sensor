@@ -12,7 +12,9 @@ import {
 } from "recharts";
 import { AxisDomain } from "recharts/types/util/types";
 import { format as formatDate } from "date-fns";
+import { hexColor } from "../taggedTemplates/hexColor";
 import { SensorCard } from "./SensorCard";
+import { SensorDot } from "./SensorDot";
 import { SensorTooltip } from "./SensorTooltip";
 import { useContext } from "react";
 
@@ -34,13 +36,15 @@ export function SensorChart(props: SensorChartProps) {
         color, name, readingType, unit, yAxisDomain,
         formatReadingValue, formatYTick
     } = props;
-    const { safetyLevelsMap, sensorChartPoints, sensorChartAxisTicks } = useContext(AppContext);
+    const {
+        safetyLevelsMap, sensorChartPoints, sensorChartAxisTicks
+    } = useContext(AppContext);
     const safetyLevels = safetyLevelsMap[readingType];
 
     return <>
         <div className="sensor-chart-wrapper">
             <SensorCard
-                color={color}
+                color={hexColor`${color}`}
                 readingType={readingType}
                 name={name}
                 unit={unit}
@@ -57,6 +61,10 @@ export function SensorChart(props: SensorChartProps) {
                         tick={{ fontSize: 12 }}
                         ticks={sensorChartAxisTicks}
                         type="number"
+                        domain={[
+                            sensorChartAxisTicks[0],
+                            sensorChartAxisTicks[sensorChartAxisTicks.length - 1]
+                        ]}
                         interval="preserveStartEnd"
                         tickFormatter={(timestamp)=>formatDate(timestamp, "hh:mm a")}
                     />
@@ -74,32 +82,49 @@ export function SensorChart(props: SensorChartProps) {
                     {safetyLevels.map(({color, label, threshold}) => <ReferenceLine
                         key={threshold}
                         y={threshold}
-                        stroke={`#` + color}
+                        stroke={hexColor`${color}`}
                         strokeWidth={1.5}
                         label={{
                             value: label,
                             position: "insideBottomLeft",
-                            fill: color,
+                            fill: hexColor`${color}`,
                             fontSize: 10,
                         }}
                     />)}
-                    <Tooltip content={
-                        <SensorTooltip
+                    <Tooltip
+                        isAnimationActive={false}
+                        content={<SensorTooltip
+                            isAnimationActive={false}
+                            safetyLevelsMap={safetyLevelsMap}
                             unit={unit}
                             formatReadingValue={formatReadingValue}
-                        />
-                    }/>
+                        />}
+                    />
                     <Legend />
                     <Area
+                        isAnimationActive={false}
                         type="monotone"
                         dataKey={readingType}
-                        stroke={`#` + color}
-                        fill={`#` + color}
-                        fillOpacity={0.3}
-                        strokeWidth={2}
+                        fill="none"
+                        fillOpacity={1}
                         name={name}
-                        dot={{ r: 3 }}
-                        activeDot={{ r: 6 }}
+                        dot={<SensorDot
+                            {...props}
+                            colorBasis="readingType"
+                            r={3}
+                            readingType={readingType}
+                            readingTypeColor={color}
+                            safetyLevels={safetyLevels}
+                        />}
+                        activeDot={<SensorDot
+                            {...props}
+                            colorBasis="generalSafetyLevel"
+                            r={5}
+                            readingType={readingType}
+                            readingTypeColor={color}
+                            safetyLevels={safetyLevels}
+                        />}
+                        stroke={hexColor`${color}`}
                         connectNulls={true}
                     />
                 </AreaChart>
@@ -108,4 +133,3 @@ export function SensorChart(props: SensorChartProps) {
     </>;
 
 }
-

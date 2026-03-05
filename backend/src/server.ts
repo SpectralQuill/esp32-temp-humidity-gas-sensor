@@ -99,20 +99,21 @@ app.get("/api/readings", async (req, res) => {
 
         const {
             startDate: startDateIso, endDate: endDateIso,
-            excludeStartDate, excludeEndDate
-        } = req.query as DateRangeDto;
+            excludeStartDate, excludeEndDate,
+            bucketIntervalMs, bucketOffsetDate: bucketOffsetDateIso
+        } = req.query as BucketedDateRangeDto;
         const startDate = startDateIso ? new Date(startDateIso as string) : null;
         const endDate = endDateIso ? new Date(endDateIso as string) : null;
         if (startDate && isNaN(startDate.getTime()))
             return res.status(400).json({ error: "Invalid startDate" });
         if (endDate && isNaN(endDate.getTime()))
             return res.status(400).json({ error: "Invalid endDate" });
+        const bucketOffsetDate = bucketOffsetDateIso ? new Date(bucketOffsetDateIso) : null;
         
         const readings = await sqliteService.getReadings(
-            startDate,
-            endDate,
-            excludeStartDate === "true",
-            excludeEndDate === "true"
+            startDate, endDate,
+            (excludeStartDate === "true"), (excludeEndDate === "true"),
+            bucketIntervalMs, bucketOffsetDate
         );
         
         res.status(200).json(readings);

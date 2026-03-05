@@ -10,7 +10,7 @@
 
 const char* ssid = "GTGA";
 const char* password = "specquil";
-const char* serverHost = "10.156.118.252:3000";
+const char* serverHost = "10.135.77.252:3000";
 
 const unsigned long REQUEST_INTERVAL_MS = 2000;
 const unsigned long HEALTH_RETRY_MS = 3000;

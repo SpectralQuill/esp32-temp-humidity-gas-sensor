@@ -3,7 +3,7 @@ export type ArrayItemCompareFunc<T> = (a: T, b: T) => number;
 export class ArrayUtils {
 
     public static binarySearchIndex<T>(
-        array: T[],
+        array: T[] | ReadonlyArray<T>,
         target: T,
         compare: ArrayItemCompareFunc<T>,
         startIndex: number = 0,
@@ -29,12 +29,14 @@ export class ArrayUtils {
 
     public static clearArray<T>(array: T[]): T[] {
 
-        array.splice(0, array.length)
+        array.length = 0;
         return array;
 
     }
     
-    public static filterNotUndefined<T>(array: (T | undefined)[]): T[] {
+    public static filterNotUndefined<T>(
+        array: (T | undefined)[]
+    ): T[] {
         return array.filter((item: T | undefined) => item !== undefined);
     }
 

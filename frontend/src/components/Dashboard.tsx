@@ -15,7 +15,7 @@ export function Dashboard() {
     return <>
         <main>
             <SensorChart
-                color="ff7300"
+                color="#ff7300"
                 readingType="temperatureC"
                 name="Temperature"
                 unit="°C"
@@ -26,7 +26,7 @@ export function Dashboard() {
                 formatReadingValue={formatTemperatureCValue}
             />
             <SensorChart
-                color="0088ff"
+                color="#0088ff"
                 readingType="humidity"
                 name="Humidity"
                 unit="%"
@@ -35,7 +35,7 @@ export function Dashboard() {
                 formatYTick={formatPercentageYTick}
             />
             <SensorChart
-                color="00cc88"
+                color="#00cc88"
                 readingType="gas"
                 name="Gas"
                 unit="%"

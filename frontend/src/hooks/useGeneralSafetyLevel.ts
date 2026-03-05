@@ -16,16 +16,11 @@ export function useGeneralSafetyLevel(
 
         const generalSafetyLevelIndex: GeneralSafetyLevels = Object.values(SensorReadingTypes)
             .reduce<GeneralSafetyLevels>((generalSafetyLevelIndex, readingType) => {
-                const value: number = sensorReading[readingType as SensorReadingType];
                 const safetyLevels: SafetyLevel[] = safetyLevelsMap[
                     readingType as SensorReadingType
                 ];
-                const safetyLevelIndex: number = ArrayUtils.binarySearchIndex(
-                    safetyLevels,
-                    { threshold: value } as SafetyLevel,
-                    compareSafetyLevels
-                ) - 1;
-                const safetyLevel: SafetyLevel | undefined = safetyLevels[safetyLevelIndex];
+                const value: number = sensorReading[readingType as SensorReadingType];
+                const safetyLevel = getSafetyLevel(safetyLevels, value);
                 const newGeneralSafetyLevelIndex = (
                     safetyLevel ? GeneralSafetyLevels[safetyLevel.level]
                     : GeneralSafetyLevels.Unknown
@@ -39,7 +34,7 @@ export function useGeneralSafetyLevel(
         ;
         return safetyLevelsMap.general[generalSafetyLevelIndex];
 
-    }, [sensorReading, safetyLevelsMap]);
+    }, [sensorReading, safetyLevelsMap, active]);
 
 }
 
@@ -49,5 +44,19 @@ export function compareSafetyLevels(
 ): number {
 
     return a.threshold - b.threshold + 0.01;
+
+}
+
+export function getSafetyLevel(
+    safetyLevels: SafetyLevel[],
+    value: number
+): SafetyLevel {
+
+    const index = ArrayUtils.binarySearchIndex(
+        safetyLevels,
+        { threshold: value } as SafetyLevel,
+        compareSafetyLevels
+    ) - 1;
+    return safetyLevels[index];
 
 }
